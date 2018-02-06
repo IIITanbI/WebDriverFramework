@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebDriverFramework", "WebDriverFramework\WebDriverFramework.csproj", "{95440912-8C1C-4A3A-A6AC-836278831F7E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "Solution\ConsoleApp1\ConsoleApp1.csproj", "{DABCE72F-8A47-4259-912B-E9C61A1B4E66}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{95440912-8C1C-4A3A-A6AC-836278831F7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95440912-8C1C-4A3A-A6AC-836278831F7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95440912-8C1C-4A3A-A6AC-836278831F7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95440912-8C1C-4A3A-A6AC-836278831F7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DABCE72F-8A47-4259-912B-E9C61A1B4E66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DABCE72F-8A47-4259-912B-E9C61A1B4E66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DABCE72F-8A47-4259-912B-E9C61A1B4E66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DABCE72F-8A47-4259-912B-E9C61A1B4E66}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5C1B3EEB-314F-4FD4-A545-495E4EEAA681}
+	EndGlobalSection
+EndGlobal
