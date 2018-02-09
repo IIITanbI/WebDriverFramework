@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebDriverFramework</RootNamespace>
     <AssemblyName>WebDriverFramework</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -51,20 +53,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyWait.cs" />
+    <Compile Include="IElementList.cs" />
+    <Compile Include="SimpleWait.cs" />
     <Compile Include="PageFactory\Attributes\ByClassNameAttribute.cs" />
     <Compile Include="PageFactory\Attributes\ByIdAttribute.cs" />
     <Compile Include="PageFactory\Attributes\ByXPathAttribute.cs" />
     <Compile Include="PageFactory\Attributes\RelateToAttribute.cs" />
-    <Compile Include="PageFactory\ProxyObject.cs" />
+    <Compile Include="Proxy\DriverObjectProxy.cs" />
+    <Compile Include="Proxy\WebElementListProxy.cs" />
+    <Compile Include="Proxy\WebElementProxy.cs" />
     <Compile Include="WebDriver.cs" />
     <Compile Include="PageFactory\Attributes\ByAttribute.cs" />
     <Compile Include="PageFactory\CustomPageObjectMemberDecorator.cs" />
     <Compile Include="PageFactory\CustomPageFactory.cs" />
     <Compile Include="PageFactory\ICustomPageObjectMemberDecorator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Extension\WebDriverExtension.cs" />
+    <Compile Include="Extension\WebDriverWaitExtension.cs" />
     <Compile Include="WebElement.cs" />
-    <Compile Include="WebElementExtension.cs" />
+    <Compile Include="Extension\WebElementExtension.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

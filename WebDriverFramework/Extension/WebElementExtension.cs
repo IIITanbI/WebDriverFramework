@@ -1,11 +1,13 @@
-﻿using OpenQA.Selenium.Internal;
+﻿using System.Collections.ObjectModel;
 
-namespace WebDriverFramework
+namespace WebDriverFramework.Extension
 {
     using System;
     using System.Threading;
     using System.Windows.Forms;
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Internal;
+    using OpenQA.Selenium.Remote;
     using Keys = OpenQA.Selenium.Keys;
 
     /// <summary>
@@ -148,67 +150,61 @@ namespace WebDriverFramework
         /// <exception cref="ArgumentNullException">
         /// throw if element is null
         /// </exception>
-        public static IWebElement GetParent(this ISearchContext element)
+        public static IWebElement GetParent(this IWebElement element)
         {
-            if (element == null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
             return element.FindElement(By.XPath("./.."));
         }
 
+        #region Waiting
+        #endregion
 
-        public static MyWait GetWait(TimeSpan timeout, params Type[] exceptionTypes)
-        {
-            var wait = new MyWait(timeout);
-            wait.IgnoreExceptionTypes(exceptionTypes);
-            return wait;
-        }
-        public static T WaitT<T>(Func<T> condition, TimeSpan timeout, params Type[] exceptionTypes)
-        {
-            return GetWait(timeout, exceptionTypes).Until(condition);
-        }
-
-        public static T WaitForElementDisplayed<T>(this T element, TimeSpan timeout) where T : IWebElement
-        {
-            WaitT(() =>
-            {
-                try
-                {
-                    return element.Displayed;
-                }
-                catch (StaleElementReferenceException)
-                {
-                    if (element.CheckElementCached())
-                    {
-                        throw;
-                    }
-
-                    return false;
-                }
-            }, timeout);
-            return element;
-        }
-
-        private static bool CheckElementCached(this IWebElement element)
+        public static bool IsElementCached(this IWebElement element)
         {
             switch (element)
             {
-                case null:
-                    throw new ArgumentNullException(nameof(element));
                 case WebElement we:
                     return we.IsCached;
+                case RemoteWebElement _:
+                    return true;
+                default:
+                    //element can be proxy with cache = true/false
+                    //assume that cache is false;
+                    return false;
             }
-
-            return true;
         }
 
-        public static T WaitForElement123<T>(this T element, TimeSpan timeout) where T : IWebElement
+        public static IWebElement Unwrap(this IWebElement element)
         {
-            // use any object's method or property (field) to unwrap it from proxy
-            WaitT(() => element.GetType(), timeout);
-            return element;
+            var e = element;
+            while (e is IWrapsElement wrap)
+            {
+                e = wrap.WrappedElement;
+            }
+
+            return e;
+        }
+
+        //public static void ExecuteJavaScript(this IWebElement element, string script, params object[] args)
+        //{
+        //    element.GetDriver().ExecuteJavaScript(script, args);
+        //}
+        //public static T ExecuteJavaScript<T>(this IWebElement element, string script, params object[] args)
+        //{
+        //    return element.GetDriver().ExecuteJavaScript<T>(script, args);
+        //}
+
+        public static IWebDriver GetDriver(this IWebElement element)
+        {
+            return (element.Unwrap() as IWrapsDriver)?.WrappedDriver ?? throw new NotImplementedException();
+        }
+
+        public static IWebElement FindElement(this IWebElement element, string xpath)
+        {
+            return element.FindElement(By.XPath(xpath));
+        }
+        public static ReadOnlyCollection<IWebElement> FindElements(this IWebElement element, string xpath)
+        {
+            return element.FindElements(By.XPath(xpath));
         }
     }
 }

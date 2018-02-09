@@ -8,6 +8,7 @@
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Reflection;
+    using Proxy;
 
     public class CustomPageObjectMemberDecorator : ICustomPageObjectMemberDecorator
     {
@@ -54,24 +55,24 @@
 
                 if (typeof(WebElement).IsAssignableFrom(targetType))
                 {
-                    var proxyElement = new ProxyElement(locator, bys, cache);
+                    var proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
                     var args = new object[] { proxyElement, this._driver };
                     result = Activator.CreateInstance(targetType, args);
                 }
                 else if (typeof(IWebElement).IsAssignableFrom(targetType))
                 {
-                    result = new ProxyElement(locator, bys, cache).Element;
+                    result = new WebElementProxy(typeof(IWebElement), locator, bys, cache).GetTransparentProxy();
                 }
                 else if (typeof(IList<WebElement>).IsAssignableFrom(targetType))
                 {
                     throw new NotImplementedException();
-                    //var proxyElement = new ProxyListElement(locator, bys, cache);
-                    //var args = new object[] { proxyElement, this._driver };
+                    //var proxyElements = new ProxyListElement(locator, bys, cache);
+                    //var args = new object[] { proxyElements, this._driver };
                     //result = Activator.CreateInstance(targetType, args);
                 }
-                else if (typeof(IList<IWebElement>).IsAssignableFrom(targetType))
+                else if (targetType == typeof(IList<IWebElement>))
                 {
-                    result = new ProxyListElement(locator, bys, cache).Elements;
+                    result = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache).GetTransparentProxy();
                 }
                 else
                 {
@@ -120,36 +121,41 @@
         {
             foreach (var member in _membersDictionary.Keys)
             {
-                if (member.GetCustomAttribute(typeof(RelateToAttribute)) is RelateToAttribute att)
+                if (!(member.GetCustomAttribute(typeof(RelateToAttribute)) is RelateToAttribute att))
                 {
-                    var name = att.FieldName;
-                    var matchList = _membersDictionary.Keys.Where(p => p.Name == name).ToList();
-                    if (matchList.Count != 1)
-                    {
-                        throw new Exception($"There is no field with name '{name}' or their number more than 1");
-                    }
+                    continue;
+                }
 
-                    var targetType = GetTargetType(member);
-                    var parentType = GetTargetType(matchList.First());
+                var name = att.FieldName;
+                var matchList = _membersDictionary.Keys.Where(p => p.Name == name).ToList();
+                if (matchList.Count != 1)
+                {
+                    throw new Exception($"There is no field with name '{name}' or their number more than 1");
+                }
 
-                    if (typeof(IWebElement).IsAssignableFrom(targetType) && typeof(IWebElement).IsAssignableFrom(parentType))
-                    {
-                        var parent = (IWebElement)_membersDictionary[matchList.First()];
-                        var decoratedValue = DecorateObject(member, new DefaultElementLocator(parent));
+                var parent = _membersDictionary[matchList.First()];
 
-                        if (member is FieldInfo field)
-                        {
-                            field.SetValue(page, decoratedValue);
-                        }
-                        else
-                        {
-                            ((PropertyInfo)member).SetValue(page, decoratedValue);
-                        }
-                    }
-                    else
-                    {
+                ISearchContext context;
+                switch (parent)
+                {
+                    case WebElement w:
+                        context = w.WrappedElement;
+                        break;
+                    case IWebElement iw:
+                        context = iw;
+                        break;
+                    default:
                         throw new NotImplementedException();
-                    }
+                }
+
+                var decoratedValue = DecorateObject(member, new DefaultElementLocator(context));
+                if (member is FieldInfo field)
+                {
+                    field.SetValue(page, decoratedValue);
+                }
+                else
+                {
+                    ((PropertyInfo)member).SetValue(page, decoratedValue);
                 }
             }
         }

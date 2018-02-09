@@ -1,97 +1,102 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using OpenQA.Selenium.Support.UI;
-
-namespace WebDriverFramework
+﻿namespace WebDriverFramework
 {
+    using Extension;
     using OpenQA.Selenium;
+    using System.Collections.ObjectModel;
+    using System.Linq;
 
     public class WebDriver : IWebDriver
     {
-        internal IWebDriver Driver { get; }
+        public double ImplicitWait => WebDriverImplicitWaitHelper.GetHelper(this).ImplicitWait;
+        public double InitialImplicitWait => WebDriverImplicitWaitHelper.GetHelper(this).InitialImplicitWait;
 
-        public WebDriver(IWebDriver driver)
+        public WebDriver(IWebDriver driver) : this(driver, 0.5)
+        {
+        }
+        public WebDriver(IWebDriver driver, double implicitWait)
         {
             this.Driver = driver;
+            WebDriverImplicitWaitHelper.RegisterDriver(this, implicitWait);
         }
 
+        public IWebDriver Driver { get; }
 
-        public WebDriverWait GetWait(TimeSpan timeout, params Type[] exceptionTypes)
+        public WebElement Get(string xpath)
         {
-            var wait = new WebDriverWait(this.Driver, timeout);
-            wait.IgnoreExceptionTypes(exceptionTypes);
-            return wait;
+            return Get(By.XPath(xpath));
         }
-
-        public IWebElement WaitForElement(TimeSpan timeout, By b)
+        public WebElement Get(By locator)
         {
-            return WaitT(d => d.FindElement(b), timeout);
+            return new WebElement(locator, this.Driver);
         }
-
-        public IWebElement WaitForElement(TimeSpan timeout, IWebElement elem)
+        private WebElement Get(IWebElement implicitElement)
         {
-            // use any object's method or property (field) to unwrap it from proxy
-            WaitT(d => elem.GetType(), timeout, typeof(NoSuchElementException));
-            return elem;
+            return new WebElement(implicitElement, this.Driver);
         }
 
-        public T WaitT<T>(Func<IWebDriver, T> condition, TimeSpan timeout, params Type[] exceptionTypes)
+        public WebElement Locate(By locator)
         {
-            return GetWait(timeout, exceptionTypes).Until(condition);
+            return new WebElement(locator, this.Driver).Locate();
         }
-
-
-        public void Close()
+        public WebElement Locate(By locator, double timeout, double implicitWait = -1)
         {
-            Driver.Close();
+            return WaitForElement(locator, timeout, true, implicitWait);
         }
 
-        public void Quit()
+        public WebElement WaitForElement(By locator, double timeout, double implicitWait = -1)
         {
-            Driver.Quit();
+            return WaitForElement(locator, timeout, false, implicitWait);
         }
-
-        public IOptions Manage()
+        public WebElement WaitForElement(By locator, double timeout, bool locate, double implicitWait = -1)
         {
-            return Driver.Manage();
+            var element = this.Get(locator);
+            this.Driver.DoWithImplicitWait(() => element.WaitForPresent(timeout), implicitWait);
+            return locate ? element.Locate() : element;
         }
-
-        public INavigation Navigate()
-        {
-            return Driver.Navigate();
-        }
-
-        public ITargetLocator SwitchTo()
-        {
-            return Driver.SwitchTo();
-        }
-
+        #region MyRegion
         public string Url
         {
             get => Driver.Url;
             set => Driver.Url = value;
         }
-
         public string Title => this.Driver.Title;
         public string PageSource => Driver.PageSource;
-
         public string CurrentWindowHandle => Driver.CurrentWindowHandle;
-
         public ReadOnlyCollection<string> WindowHandles => Driver.WindowHandles;
+
+        public void Close()
+        {
+            Driver.Close();
+        }
+        public void Quit()
+        {
+            Driver.Quit();
+        }
+        public IOptions Manage()
+        {
+            return Driver.Manage();
+        }
+        public INavigation Navigate()
+        {
+            return Driver.Navigate();
+        }
+        public ITargetLocator SwitchTo()
+        {
+            return Driver.SwitchTo();
+        }
 
         public IWebElement FindElement(By by)
         {
-            return Driver.FindElement(by);
+            return this.Get(by).Locate();
         }
-
         public ReadOnlyCollection<IWebElement> FindElements(By by)
         {
-            return Driver.FindElements(by);
+            return this.Driver.FindElements(by).Select(this.Get).Cast<IWebElement>().ToList().AsReadOnly();
         }
-
         public void Dispose()
         {
             Driver.Dispose();
         }
+        #endregion
     }
 }

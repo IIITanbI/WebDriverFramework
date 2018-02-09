@@ -1,67 +1,128 @@
-﻿using System.Reflection;
+﻿using WebDriverFramework.Proxy;
 
 namespace WebDriverFramework
 {
+    using Extension;
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Internal;
+    using OpenQA.Selenium.Support.Extensions;
+    using OpenQA.Selenium.Support.PageObjects;
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Drawing;
     using System.Linq;
 
-    public class WebElement : IWebElement
+    public class ListWebElement : IElementList
     {
-        private ProxyElement ProxyElement { get; }
-        private IWebElement ImplicitElement { get; }
-        private IWebDriver Driver { get; }
+        private IList<IWebElement> _proxiedElements;
 
-        public WebElement(ProxyElement proxyElement, IWebDriver driver) : this(proxyElement, null, driver)
+        public ListWebElement(By locator, IWebDriver driver) : this(locator, null, driver)
         {
         }
-        public WebElement(ProxyElement proxyElement, WebElement parent, IWebDriver driver) : this((By)null, parent, driver)
-        {
-            this.ProxyElement = proxyElement;
-        }
-
-        public WebElement(IWebElement implicitElement, IWebDriver driver) : this(implicitElement, null, driver)
-        {
-        }
-        public WebElement(IWebElement implicitElement, WebElement parent, IWebDriver driver) : this((By)null, parent, driver)
-        {
-            this.ImplicitElement = implicitElement;
-        }
-
-        public WebElement(By locator, IWebDriver driver) : this(locator, null, driver)
-        {
-        }
-        public WebElement(By locator, WebElement parent, IWebDriver driver)
+        public ListWebElement(By locator, WebElement parent, IWebDriver driver) : this(GetProxy(locator, parent, driver, false))
         {
             this.Locator = locator;
             this.Parent = parent;
-            this.Driver = driver;
+            this.WrappedDriver = driver;
+        }
+        public ListWebElement(IList<IWebElement> proxiedElements)
+        {
+            this._proxiedElements = proxiedElements;
         }
 
-        public IWebElement Element => this.ImplicitElement
-                                   ?? this.ProxyElement?.Element
-                                   ?? this.Parent?.FindElement(Locator)
-                                   ?? this.Driver.FindElement(Locator);
+        public List<WebElement> Elements => this._proxiedElements.Select(CreateElement).ToList();
+        public int Count => this.Elements.Count;
+        public WebElement this[int index] => this.Elements[index];
+
+        public IWebDriver WrappedDriver { get; }
         public By Locator { get; }
         public WebElement Parent { get; }
 
-        public bool IsProxy => this.ProxyElement != null;
-        public bool IsImplicit => this.ImplicitElement != null;
-        public bool IsCached
+        public List<WebElement> Get(By locator)
         {
-            get
-            {
-                if (this.ProxyElement != null)
-                {
-                    return this.ProxyElement.Cache;
-                }
-
-                return this.ImplicitElement != null;
-            }
+            return this.Elements.Select(e => e.Get(locator)).ToList();
         }
+        public WebElement GetByText(string text)
+        {
+            return this.Elements.FirstOrDefault(e => e.Text.Trim() == text);
+        }
+
+        public IElementList Locate()
+        {
+            this._proxiedElements = this.Elements.Select(e => e.Locate().Element).ToList();
+            return this;
+        }
+        public IElementList CheckStaleness()
+        {
+            this.Elements.ForEach(e => e.CheckStaleness());
+            return this;
+        }
+
+        public IEnumerator<WebElement> GetEnumerator()
+        {
+            return Elements.GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)Elements).GetEnumerator();
+        }
+
+        private WebElement CreateElement(IWebElement element)
+        {
+            return new WebElement(element, this.WrappedDriver);
+        }
+        private static IList<IWebElement> GetProxy(By locator, WebElement parent, IWebDriver driver, bool cache)
+        {
+            return (IList<IWebElement>)new WebElementListProxy(typeof(IList<IWebElement>), new DefaultElementLocator((ISearchContext)parent?.WrappedElement ?? driver),
+                new[] { locator }, cache).GetTransparentProxy();
+        }
+    }
+
+    public class WebElement : IWebElement, IWrapsElement, IWrapsDriver
+    {
+        public WebElement(IWebElement implicitElement, IWebDriver driver) : this(implicitElement, null, driver)
+        {
+        }
+        internal WebElement(IWebElement implicitElement, WebElement parent, IWebDriver driver) : this(driver)
+        {
+            this.ProxyElement = new WebElementProxy(implicitElement);
+            this.Parent = parent;
+        }
+         
+        public WebElement(By locator, IWebDriver driver) : this(locator, null, driver)
+        {
+        }
+        public WebElement(By locator, WebElement parent, IWebDriver driver) : this(driver)
+        {
+            ISearchContext searchContext = parent?.WrappedElement ?? driver as ISearchContext;
+            this.ProxyElement = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(searchContext), new[] { locator }, false);
+            this.Parent = parent;
+        }
+
+        public WebElement(WebElementProxy proxyElement, IWebDriver driver) : this(driver)
+        {
+            this.ProxyElement = proxyElement;
+        }
+        private WebElement(IWebDriver driver)
+        {
+            this.WrappedDriver = driver;
+        }
+
+        public IWebElement Element => this.WrappedElement.Unwrap();
+        public IWebElement WrappedElement => this.ProxyElement.WrappedElement;
+        private WebElementProxy ProxyElement { get; }
+
+        public IWebDriver WrappedDriver { get; }
+        private WebDriver _Driver => new WebDriver(WrappedDriver);
+
+        public List<By> Locators => this.ProxyElement.Bys.ToList();
+        public By Locator => Locators.First();
+        public WebElement Parent { get; }
+
+        public bool IsImplicit => this.ProxyElement.IsImplicit;
+        public bool IsCached => this.ProxyElement.IsCached;
 
         public bool Exist
         {
@@ -82,75 +143,117 @@ namespace WebDriverFramework
                 }
             }
         }
-
-        public bool StubActionOnElement()
+        public bool IsStale
         {
-            return this.Element.Displayed;
+            get
+            {
+                try
+                {
+                    StubActionOnElement();
+                    return true;
+                }
+                catch (NoSuchElementException)
+                {
+                    return false;
+                }
+                catch (StaleElementReferenceException)
+                {
+                    return true;
+                }
+            }
         }
 
+        public WebElement CheckStaleness()
+        {
+            StubActionOnElement();
+            return this;
+        }
 
-        public WebElement Has(By locator)
+        public WebElement StubActionOnElement()
         {
-            return this.Has<WebElement>(locator);
+            //call any property on element
+            var tagName = Element.TagName;
+            return this;
         }
-        public WebElement Has(IWebElement element)
+
+        public WebElement Get(By locator)
         {
-            return this.Has<WebElement>(element);
+            return new WebElement(locator, this, this.WrappedDriver);
         }
-        public T Has<T>(By locator) where T : WebElement
+        public WebElement Get(string xpath)
         {
-            return (T)Activator.CreateInstance(typeof(T), locator, this.Driver);
+            return Get(By.XPath(xpath));
         }
-        public T Has<T>(IWebElement element) where T : WebElement
+
+        public IElementList GetAll(By locator)
         {
-            return (T)Activator.CreateInstance(typeof(T), element, this.Driver);
+            return new ListWebElement(locator, this, this.WrappedDriver);
         }
+        public IElementList GetAll(string xpath)
+        {
+            return GetAll(By.XPath(xpath));
+        }
+
+        private WebElement Get(IWebElement implicitElement)
+        {
+            return new WebElement(implicitElement, this, this.WrappedDriver);
+        }
+
+        public WebElement Locate()
+        {
+            return this.IsCached ? this : new WebElement(this.Element, this.WrappedDriver);
+        }
+
+        #region JS
+        public void JSClick()
+        {
+            this.WrappedDriver.ExecuteJavaScript("arguments[0].click()", this.Element);
+        }
+        public void JSScrollIntoView()
+        {
+            this.WrappedDriver.ExecuteJavaScript("arguments[0].scrollIntoView(true)", this.Element);
+        }
+        public void JSScrollTo()
+        {
+            var elem = this.Element;
+            this.WrappedDriver.ExecuteJavaScript($"window.scrollTo({elem.Location.X}, {elem.Location.Y})", this.Element);
+        }
+        #endregion
+
 
         #region MyRegion
         public string TagName => Element.TagName;
-
         public string Text => TagName == "input" ? GetAttribute("value") : Element.Text;
-
         public bool Enabled => Element.Enabled;
-
         public bool Selected => Element.Selected;
-
         public Point Location => Element.Location;
-
         public Size Size => Element.Size;
-
         public bool Displayed => Element.Displayed;
 
         public void Clear()
         {
             Element.Clear();
         }
-
         public void SendKeys(string text)
         {
             Element.SendKeys(text);
         }
-
         public void Submit()
         {
             Element.Submit();
         }
-
         public void Click()
         {
             Element.Click();
         }
-
         public string GetAttribute(string attributeName)
         {
             return Element.GetAttribute(attributeName);
         }
-
         public string GetProperty(string propertyName)
         {
             return Element.GetProperty(propertyName);
         }
-
         public string GetCssValue(string propertyName)
         {
             return Element.GetCssValue(propertyName);
@@ -158,42 +261,25 @@ namespace WebDriverFramework
 
         public IWebElement FindElement(By by)
         {
-            return Element.FindElement(by);
+            return this.Get(by).Locate();
         }
-
         public ReadOnlyCollection<IWebElement> FindElements(By by)
         {
-            IEnumerable<IWebElement> collection = Element.FindElements(by).Select(this.Has);
-            return collection.ToList().AsReadOnly();
+            return Element.FindElements(by).Select(this.Get).Cast<IWebElement>().ToList().AsReadOnly();
         }
         #endregion
 
         #region Wait
-        public MyWait GetWait(TimeSpan timeout, params Type[] exceptionTypes)
+        public T Wait<T>(Func<T> condition, double timeout, params Type[] exceptionTypes)
         {
-            var wait = new MyWait(this.Driver, timeout);
-            wait.IgnoreExceptionTypes(exceptionTypes);
-            return wait;
+            return this.WrappedDriver.GetWait(timeout, exceptionTypes).Until(condition);
+        }
+        public T Wait<T>(Func<IWebDriver, T> condition, double timeout, params Type[] exceptionTypes)
+        {
+            return this.WrappedDriver.GetWait(timeout, exceptionTypes).Until(condition);
         }
 
-        public T Wait<T>(Func<T> condition, TimeSpan timeout, params Type[] exceptionTypes)
-        {
-            return GetWait(timeout, exceptionTypes).Until(condition);
-        }
-        public T Wait<T>(Func<IWebDriver, T> condition, TimeSpan timeout, params Type[] exceptionTypes)
-        {
-            return GetWait(timeout, exceptionTypes).Until(condition);
-        }
-
-        /// <summary>
-        /// If it is proxy => call any property or function to get element from proxy (also check for stale reference, if proxy is cached) 
-        /// If it is implicit => call any property or function to check element not stale
-        /// if it is locator => find element by locator and call any property to check element is found
-        /// If element is cached and StaleElementReferenceException was raised, throw this exception
-        /// </summary>
-        /// <param name="timeout"></param>
-        /// <returns></returns>
-        public WebElement WaitForElement(TimeSpan timeout)
+        public WebElement WaitForPresent(double timeout)
         {
             Wait(() =>
             {
@@ -202,34 +288,20 @@ namespace WebDriverFramework
                     this.StubActionOnElement();
                     return true;
                 }
-                catch (Exception ex)
+                catch (StaleElementReferenceException) when (!this.IsCached)
                 {
-                    switch (ResolveException(ex))
-                    {
-                        case StaleElementReferenceException s:
-                            if (this.IsCached)
-                            {
-                                throw;
-                            }
-                            return false;
-                        default:
-                            throw;
-                    }
+                    return false;
                 }
             }, timeout);
 
             return this;
         }
-
-        /// <summary>
-        /// If it is proxy => call any property or function to get element from proxy (also check for stale reference, if proxy is cached) 
-        /// If it is implicit => call any property or function to check element not stale
-        /// if it is locator => find element by locator and call any property to check element is found
-        /// If element is cached and StaleElementReferenceException was raised, than to assume that element is not present
-        /// </summary>
-        /// <param name="timeout"></param>
-        /// <returns></returns>
-        public WebElement WaitForNoElement(TimeSpan timeout)
+        public WebElement WaitForPresent(double timeout, double implicitWait)
+        {
+            this.WrappedDriver.DoWithImplicitWait(() => this.WaitForPresent(timeout), implicitWait);
+            return this;
+        }
+        public WebElement WaitForNotPresent(double timeout)
         {
             Wait(() =>
             {
@@ -238,28 +310,20 @@ namespace WebDriverFramework
                     this.StubActionOnElement();
                     return true;
                 }
-                catch (Exception ex)
+                catch (NoSuchElementException)
                 {
-                    switch (ResolveException(ex))
-                    {
-                        case NoSuchElementException n:
-                            return true;
-                        case StaleElementReferenceException s:
-                            if (this.IsCached)
-                            {
-                                throw;
-                            }
-                            return true;
-                        default:
-                            throw;
-                    }
+                    return true;
+                }
+                catch (StaleElementReferenceException)
+                {
+                    return true;
                 }
             }, timeout);
 
             return this;
         }
 
-        public WebElement WaitForElementDisplayed(TimeSpan timeout)
+        public WebElement WaitForElementDisplayed(double timeout)
         {
             Wait(() =>
             {
@@ -267,25 +331,15 @@ namespace WebDriverFramework
                 {
                     return this.Element.Displayed;
                 }
-                catch (Exception ex)
+                catch (StaleElementReferenceException) when (!this.IsCached)
                 {
-                    switch (ResolveException(ex))
-                    {
-                        case StaleElementReferenceException s:
-                            if (this.IsCached)
-                            {
-                                throw;
-                            }
-                            return false;
-                        default:
-                            throw;
-                    }
+                    return false;
                 }
             }, timeout);
 
             return this;
         }
-        public WebElement WaitForElementNotDisplayed(TimeSpan timeout)
+        public WebElement WaitForElementNotDisplayed(double timeout)
         {
             Wait(() =>
             {
@@ -293,23 +347,20 @@ namespace WebDriverFramework
                 {
                     return !this.Element.Displayed;
                 }
-                catch (Exception ex)
+                catch (NoSuchElementException)
                 {
-                    switch (ResolveException(ex))
-                    {
-                        case NoSuchElementException n:
-                        case StaleElementReferenceException s:
-                            return true;
-                        default:
-                            throw;
-                    }
+                    return true;
+                }
+                catch (StaleElementReferenceException)
+                {
+                    return true;
                 }
             }, timeout);
 
             return this;
         }
 
-        public WebElement WaitForElementClickable(TimeSpan timeout)
+        public WebElement WaitForElementClickable(double timeout)
         {
             Wait(() =>
             {
@@ -317,46 +368,27 @@ namespace WebDriverFramework
                 {
                     return this.Element.Enabled;
                 }
-                catch (Exception ex)
+                catch (StaleElementReferenceException) when (!this.IsCached)
                 {
-                    switch (ResolveException(ex))
-                    {
-                        case StaleElementReferenceException s:
-                            if (this.IsCached)
-                            {
-                                throw;
-                            }
-                            return false;
-                        default:
-                            throw;
-                    }
+                    return false;
                 }
             }, timeout);
 
             return this;
         }
 
-        private bool? ProcessException(Exception ex, bool noSuchElementException, bool staleElementReferenceException, bool throwOnstaleElementReferenceException)
+        private bool? ProcessException(Exception ex, bool staleElementReferenceException, bool noSuchElementException = false)
         {
-            switch (ResolveException(ex))
+            switch (ex)
             {
-                case NoSuchElementException nsee:
-                    return noSuchElementException;
-                case StaleElementReferenceException sere:
-                    if (this.IsCached && throwOnstaleElementReferenceException)
-                    {
-                        return null;
-                    }
+                case StaleElementReferenceException s when staleElementReferenceException || !this.IsCached:
                     return staleElementReferenceException;
-                default:
-                    return null;
+                case NoSuchElementException n:
+                    return noSuchElementException;
             }
-        }
-        private static Exception ResolveException(Exception ex)
-        {
-            return (ex as TargetInvocationException)?.InnerException ?? ex;
-        }
 
+            return null;
+        }
         #endregion
     }
 }
