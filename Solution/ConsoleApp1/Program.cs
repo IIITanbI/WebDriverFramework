@@ -13,6 +13,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
+using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.Extensions;
@@ -26,8 +27,11 @@ namespace ConsoleApp1
 {
     class Program
     {
-        private WebDriver Driver;
-
+        public static void DoComething()
+        {
+            
+        }
+        [FindsBy(How = How.XPath, Using = "//div[@class='test']")]
         [ByXPath("//div[@class='test']")]
         public IWebElement Test = null;
 
@@ -47,8 +51,7 @@ namespace ConsoleApp1
 
         public Program(WebDriver driver)
         {
-            this.Driver = driver;
-            CustomPageFactory.InitElements(this, driver, new CustomPageObjectMemberDecorator(driver.Driver));
+            CustomPageFactory.InitElements(this, driver, new CustomPageObjectMemberDecorator(driver.WrappedDriver));
         }
 
         static void Main(string[] args)
@@ -63,11 +66,19 @@ namespace ConsoleApp1
             IWebDriver _driver = new ChromeDriver();
             var driver = new WebDriver(_driver);
             driver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
-            driver.RegisterDriver(0.5);
-            driver.SetImplicitWait(10);
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
             var pr = new Program(driver);
-
+            try
+            {
+                var z = pr.Test as IWebElement;
+                var y = z.GetType();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            var abc = pr.element1.Element as IWrapsElement;
+            new Actions(driver).KeyDown(pr.Test, "s");
             Console.WriteLine(driver.GetImplicitWait());
             driver.DoWithImplicitWait(() =>
             {
@@ -114,7 +125,7 @@ namespace ConsoleApp1
             {
             }
 
-            var rr2 = new WebElement(By.XPath("some"), driver.Driver);
+            var rr2 = new WebElement(By.XPath("some"), driver.WrappedDriver);
             var rr3 = driver.WaitForElement(By.XPath("some"), 10);
             var rr4 = new WebElement(By.XPath("some"), _driver).WaitForPresent(10);
             var rr5 = driver.Get(By.XPath("some")).WaitForPresent(10);
@@ -128,7 +139,7 @@ namespace ConsoleApp1
             var ggg = pr.element1.Displayed;
             var gg = pr.element1.WaitForElementDisplayed(10);
             var res1 = driver.FindElement(By.XPath(".//*")).Displayed;
-            pr.element1 = new WebElement(By.XPath("//div[@class='test']"), driver.Driver);
+            pr.element1 = new WebElement(By.XPath("//div[@class='test']"), driver.WrappedDriver);
             var vis = pr.element2.Text;
             var vis3 = pr.element3.Text;
             var vis4 = pr.element4.ToList();

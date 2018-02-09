@@ -18,7 +18,7 @@
         /// </exception>
         public static void InitElements(object page, WebDriver driver, IPageObjectMemberDecorator decorator)
         {
-            InitElements(page, new DefaultElementLocator(driver.Driver), decorator);
+            InitElements(page, new DefaultElementLocator(driver.WrappedDriver), decorator);
         }
 
         /// <summary>

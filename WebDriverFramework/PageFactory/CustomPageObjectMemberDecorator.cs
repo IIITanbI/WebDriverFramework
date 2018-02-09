@@ -1,4 +1,8 @@
-﻿namespace WebDriverFramework.PageFactory
+﻿using System.Reflection.Emit;
+using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Internal;
+
+namespace WebDriverFramework.PageFactory
 {
     using Attributes;
     using OpenQA.Selenium;
@@ -55,13 +59,14 @@
 
                 if (typeof(WebElement).IsAssignableFrom(targetType))
                 {
-                    var proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
+                    var proxyElement = new WebElementProxy(CreateTypeForASingleElement(), locator, bys, cache);
                     var args = new object[] { proxyElement, this._driver };
                     result = Activator.CreateInstance(targetType, args);
                 }
                 else if (typeof(IWebElement).IsAssignableFrom(targetType))
                 {
-                    result = new WebElementProxy(typeof(IWebElement), locator, bys, cache).GetTransparentProxy();
+                    //result = new DefaultPageObjectMemberDecorator().Decorate(member, locator);
+                    result = new WebElementProxy(CreateTypeForASingleElement(), locator, bys, cache).GetTransparentProxy();
                 }
                 else if (typeof(IList<WebElement>).IsAssignableFrom(targetType))
                 {
@@ -139,7 +144,7 @@
                 switch (parent)
                 {
                     case WebElement w:
-                        context = w.WrappedElement;
+                        context = w.ProxiedElement;
                         break;
                     case IWebElement iw:
                         context = iw;
@@ -165,6 +170,31 @@
             Type targetType = (member as FieldInfo)?.FieldType
                            ?? (member as PropertyInfo)?.PropertyType;
             return targetType;
+        }
+
+        private static List<Type> InterfacesToBeProxied => new List<Type>
+        {
+            typeof(IWebElement),
+            typeof(ILocatable),
+            typeof(IWrapsElement),
+            typeof(ITestable),
+        };
+
+        private static Type CreateTypeForASingleElement()
+        {
+            AssemblyName tempAssemblyName = new AssemblyName(Guid.NewGuid().ToString());
+
+            AssemblyBuilder dynamicAssembly = AppDomain.CurrentDomain.DefineDynamicAssembly(tempAssemblyName, AssemblyBuilderAccess.Run);
+            ModuleBuilder moduleBuilder = dynamicAssembly.DefineDynamicModule(tempAssemblyName.Name);
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(typeof(IWebElement).FullName, TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
+
+            foreach (Type type in InterfacesToBeProxied)
+            {
+                typeBuilder.AddInterfaceImplementation(type);
+            }
+
+            var tsdasdype = typeBuilder.CreateType();
+            return typeBuilder.CreateType();
         }
 
         private class DefaultPageObjectMemberDecoratorProxy : DefaultPageObjectMemberDecorator
