@@ -3,12 +3,12 @@
     using Attributes;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Support.PageObjects;
+    using Proxy;
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Reflection;
-    using Proxy;
 
     public class CustomPageObjectMemberDecorator : ICustomPageObjectMemberDecorator
     {

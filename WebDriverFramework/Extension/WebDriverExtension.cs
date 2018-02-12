@@ -24,6 +24,8 @@
             return cachedDrivers[driver];
         }
 
+
+
         private IWebDriver driver;
         private Stack<double> timeouts = new Stack<double>();
 
@@ -81,21 +83,6 @@
             }
         }
 
-        public T DoWithWait<T>(Func<T> func, double timeout)
-        {
-            var implicitWait = timeout;
-
-            try
-            {
-                driver.SetImplicitWait(implicitWait);
-                return func();
-            }
-            finally
-            {
-                driver.RevertImplicitWait();
-            }
-        }
-
         private void _setImplicitWait(double seconds)
         {
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(seconds);
@@ -132,24 +119,6 @@
         public static T Wait<T>(this IWebDriver driver, Func<T> condition, double timeout, params Type[] exceptionTypes)
         {
             return driver.GetWait(timeout, exceptionTypes).Until(condition);
-        }
-
-        public static IWebElement WaitForElement(this IWebDriver driver, IWebElement element, double timeout)
-        {
-            driver.GetWait(timeout).Until(() =>
-            {
-                try
-                {
-                    var e = element.TagName;
-                    return true;
-                }
-                catch (StaleElementReferenceException) when (!element.IsElementCached())
-                {
-                    return false;
-                }
-            });
-
-            return element;
         }
     }
 }

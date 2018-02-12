@@ -1,12 +1,11 @@
-﻿using WebDriverFramework.Proxy;
-
-namespace WebDriverFramework
+﻿namespace WebDriverFramework
 {
     using Extension;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Internal;
     using OpenQA.Selenium.Support.Extensions;
     using OpenQA.Selenium.Support.PageObjects;
+    using Proxy;
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -15,6 +14,9 @@ namespace WebDriverFramework
 
     public class WebElement : IWebElement, IWrapsDriver, IWrapsElement
     {
+        private WebElementProxy WebElementProxy;
+        private double _elementSearchTimeout;
+
         public WebElement(IWebElement implicitElement, IWebDriver driver) : this(implicitElement, null, driver)
         {
         }
@@ -41,32 +43,26 @@ namespace WebDriverFramework
         private WebElement(IWebDriver driver)
         {
             this.WrappedDriver = driver;
+            this.SetSearchElementTimeout(DefaultElementSearchTimeout);
         }
 
-        public IWebElement Element => this.WrappedElement.Unwrap();
-        public IWebElement WrappedElement => (IWebElement)this.WebElementProxy.GetTransparentProxy();
-
-        public double FindTimeout { get; set; } = 30;
-
-        public IWebElement Element1
+        public static double DefaultElementSearchTimeout { get; set; } = 30;
+        public double ElementSearchTimeout
         {
-            get
-            {
-                return  this._Driver.Wait(() => this.WrappedElement.Unwrap(), this.FindTimeout);
-            }
+            get => _elementSearchTimeout;
+            set => _elementSearchTimeout = ResolveTime(value, DefaultElementSearchTimeout);
         }
-
-        private WebElementProxy WebElementProxy { get; }
+        public double WaitTimeout { get; set; } = 60;
 
         public IWebDriver WrappedDriver { get; }
-        private WebDriver _Driver => new WebDriver(WrappedDriver);
+        public IWebElement WrappedElement => (IWebElement)this.WebElementProxy.GetTransparentProxy();
+        public IWebElement Element => this.WrappedDriver.Wait(() => this.WrappedElement.Unwrap(), this.ElementSearchTimeout);
 
         public List<By> Locators => this.WebElementProxy.Bys.ToList();
         public By Locator => Locators.First();
         public WebElement Parent { get; }
 
         public bool IsCached => this.WebElementProxy.IsCached;
-
         public bool Exist
         {
             get
@@ -119,13 +115,26 @@ namespace WebDriverFramework
             return this;
         }
 
-        public WebElement Get(By locator)
-        {
-            return new WebElement(locator, this, this.WrappedDriver);
-        }
         public WebElement Get(string xpath)
         {
-            return Get(By.XPath(xpath));
+            return Get(xpath, DefaultElementSearchTimeout);
+        }
+        public WebElement Get(string xpath, double searchTimeout)
+        {
+            return Get(By.XPath(xpath), searchTimeout);
+        }
+        public WebElement Get(By locator)
+        {
+            return Get(locator, DefaultElementSearchTimeout);
+        }
+        public WebElement Get(By locator, double searchTimeout)
+        {
+            return new WebElement(locator, this, this.WrappedDriver).SetSearchElementTimeout(searchTimeout);
+        }
+
+        private WebElement Get(IWebElement implicitElement)
+        {
+            return new WebElement(implicitElement, this, this.WrappedDriver);
         }
 
         public IElementList GetAll(By locator)
@@ -135,11 +144,6 @@ namespace WebDriverFramework
         public IElementList GetAll(string xpath)
         {
             return GetAll(By.XPath(xpath));
-        }
-
-        private WebElement Get(IWebElement implicitElement)
-        {
-            return new WebElement(implicitElement, this, this.WrappedDriver);
         }
 
         public WebElement Locate()
@@ -162,7 +166,6 @@ namespace WebDriverFramework
             this.WrappedDriver.ExecuteJavaScript($"window.scrollTo({elem.Location.X}, {elem.Location.Y})", this.Element);
         }
         #endregion
-
 
         #region MyRegion
         public string TagName => Element.TagName;
@@ -215,14 +218,16 @@ namespace WebDriverFramework
         #region Wait
         public T Wait<T>(Func<T> condition, double timeout, params Type[] exceptionTypes)
         {
+            timeout = ResolveTime(timeout, this.WaitTimeout);
             return this.WrappedDriver.GetWait(timeout, exceptionTypes).Until(condition);
         }
         public T Wait<T>(Func<IWebDriver, T> condition, double timeout, params Type[] exceptionTypes)
         {
+            timeout = ResolveTime(timeout, this.WaitTimeout);
             return this.WrappedDriver.GetWait(timeout, exceptionTypes).Until(condition);
         }
 
-        public WebElement WaitForPresent(double timeout)
+        public WebElement WaitForPresent(double timeout = -1)
         {
             Wait(() =>
             {
@@ -236,15 +241,9 @@ namespace WebDriverFramework
                     return false;
                 }
             }, timeout);
-
             return this;
         }
-        public WebElement WaitForPresent(double timeout, double implicitWait)
-        {
-            this.WrappedDriver.DoWithImplicitWait(() => this.WaitForPresent(timeout), implicitWait);
-            return this;
-        }
-        public WebElement WaitForNotPresent(double timeout)
+        public WebElement WaitForNotPresent(double timeout = -1)
         {
             Wait(() =>
             {
@@ -266,7 +265,7 @@ namespace WebDriverFramework
             return this;
         }
 
-        public WebElement WaitForElementDisplayed(double timeout)
+        public WebElement WaitForElementDisplayed(double timeout = -1)
         {
             Wait(() =>
             {
@@ -282,7 +281,7 @@ namespace WebDriverFramework
 
             return this;
         }
-        public WebElement WaitForElementNotDisplayed(double timeout)
+        public WebElement WaitForElementNotDisplayed(double timeout = -1)
         {
             Wait(() =>
             {
@@ -303,7 +302,7 @@ namespace WebDriverFramework
             return this;
         }
 
-        public WebElement WaitForElementClickable(double timeout)
+        public WebElement WaitForElementClickable(double timeout = -1)
         {
             Wait(() =>
             {
@@ -333,5 +332,12 @@ namespace WebDriverFramework
             return null;
         }
         #endregion
+
+        public WebElement SetSearchElementTimeout(double timeout)
+        {
+            this.ElementSearchTimeout = timeout;
+            return this;
+        }
+        private double ResolveTime(double time, double defaultValue) => time < 0 ? defaultValue : time;
     }
 }

@@ -29,7 +29,7 @@ namespace ConsoleApp1
     {
         public static void DoComething()
         {
-            
+
         }
         [FindsBy(How = How.XPath, Using = "//div[@class='test']")]
         [ByXPath("//div[@class='test']")]
@@ -56,13 +56,14 @@ namespace ConsoleApp1
 
         static void Main(string[] args)
         {
-
             //IWebDriver _driver = new FirefoxDriver(new FirefoxOptions(){BrowserExecutableLocation = "C:\\Program Files\\Mozilla Firefox\\firefox.exe" });
             //IWebDriver _driver = new InternetExplorerDriver(new InternetExplorerOptions()
             //{
             //    IntroduceInstabilityByIgnoringProtectedModeSettings = true,
             //    IgnoreZoomLevel = true
             //});
+            WebElement.DefaultElementSearchTimeout = 60;
+
             IWebDriver _driver = new ChromeDriver();
             var driver = new WebDriver(_driver);
             driver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
@@ -110,6 +111,43 @@ namespace ConsoleApp1
                 }
             }, 20);
             Console.WriteLine(driver.GetImplicitWait());
+
+            var w = driver.WaitForElement(".//[@class='test']", 10);
+            var f = driver.Get(".//[@class='test']").SetSearchElementTimeout(10).WaitForPresent(10);
+            var g = driver.Get(".//[@class='test']").WaitForPresent(10);
+            var v = driver.WaitForElement(".//[@class='test']", 10);
+            Console.WriteLine(driver.GetImplicitWait());
+            driver.DoWithImplicitWait(() =>
+            {
+                {
+                    var sw = Stopwatch.StartNew();
+                    var exist = driver.Get("sadlkjaslkjd").SetSearchElementTimeout(10).Exist;
+                    sw.Stop();
+                    Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
+                }
+                Console.WriteLine(driver.GetImplicitWait());
+                driver.DoWithImplicitWait(() =>
+                {
+                    {
+                        var sw = Stopwatch.StartNew();
+                        var exist = driver.Get("sadlkjaslkjd").Exist;
+                        sw.Stop();
+                        Console.WriteLine("lvl 2 :" + sw.ElapsedMilliseconds);
+                        Console.WriteLine(driver.GetImplicitWait());
+                    }
+                }, 5);
+                Console.WriteLine(driver.GetImplicitWait());
+                {
+                    var sw = Stopwatch.StartNew();
+                    var exist = driver.Get("sadlkjaslkjd").Exist;
+                    sw.Stop();
+                    Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
+                    Console.WriteLine(driver.GetImplicitWait());
+                }
+            }, 20);
+            Console.WriteLine(driver.GetImplicitWait());
+
+
             var elements = driver.Get("/*").GetAll(".//*");
             var zzzxczx = elements.Count;
             var test = elements.Locate();

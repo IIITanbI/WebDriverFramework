@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IElementList.cs" />
+    <Compile Include="ListWebElement.cs" />
     <Compile Include="SimpleWait.cs" />
     <Compile Include="PageFactory\Attributes\ByClassNameAttribute.cs" />
     <Compile Include="PageFactory\Attributes\ByIdAttribute.cs" />

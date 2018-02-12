@@ -1,9 +1,8 @@
-﻿using OpenQA.Selenium.Internal;
-
-namespace WebDriverFramework
+﻿namespace WebDriverFramework
 {
     using Extension;
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Internal;
     using System.Collections.ObjectModel;
     using System.Linq;
 
@@ -12,10 +11,7 @@ namespace WebDriverFramework
         public double ImplicitWait => WebDriverImplicitWaitHelper.GetHelper(this).ImplicitWait;
         public double InitialImplicitWait => WebDriverImplicitWaitHelper.GetHelper(this).InitialImplicitWait;
 
-        public WebDriver(IWebDriver driver) : this(driver, 0.5)
-        {
-        }
-        public WebDriver(IWebDriver driver, double implicitWait)
+        public WebDriver(IWebDriver driver, double implicitWait = 0)
         {
             this.WrappedDriver = driver;
             WebDriverImplicitWaitHelper.RegisterDriver(this, implicitWait);
@@ -36,24 +32,13 @@ namespace WebDriverFramework
             return new WebElement(implicitElement, this.WrappedDriver);
         }
 
-        public WebElement Locate(By locator)
+        public WebElement WaitForElement(By locator, double timeout = -1)
         {
-            return new WebElement(locator, this.WrappedDriver).Locate();
+            return this.Get(locator).WaitForPresent(timeout);
         }
-        public WebElement Locate(By locator, double timeout, double implicitWait = -1)
+        public WebElement WaitForElement(string xpath, double timeout = -1)
         {
-            return WaitForElement(locator, timeout, true, implicitWait);
-        }
-
-        public WebElement WaitForElement(By locator, double timeout, double implicitWait = -1)
-        {
-            return WaitForElement(locator, timeout, false, implicitWait);
-        }
-        public WebElement WaitForElement(By locator, double timeout, bool locate, double implicitWait = -1)
-        {
-            var element = this.Get(locator);
-            this.WrappedDriver.DoWithImplicitWait(() => element.WaitForPresent(timeout), implicitWait);
-            return locate ? element.Locate() : element;
+            return WaitForElement(By.XPath(xpath), timeout);
         }
 
         #region MyRegion
