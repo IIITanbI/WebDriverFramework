@@ -1,11 +1,13 @@
-﻿namespace WebDriverFramework
+﻿using OpenQA.Selenium.Internal;
+
+namespace WebDriverFramework
 {
     using Extension;
     using OpenQA.Selenium;
     using System.Collections.ObjectModel;
     using System.Linq;
 
-    public class WebDriver : IWebDriver
+    public class WebDriver : IWebDriver, IWrapsDriver
     {
         public double ImplicitWait => WebDriverImplicitWaitHelper.GetHelper(this).ImplicitWait;
         public double InitialImplicitWait => WebDriverImplicitWaitHelper.GetHelper(this).InitialImplicitWait;
@@ -15,11 +17,11 @@
         }
         public WebDriver(IWebDriver driver, double implicitWait)
         {
-            this.Driver = driver;
+            this.WrappedDriver = driver;
             WebDriverImplicitWaitHelper.RegisterDriver(this, implicitWait);
         }
 
-        public IWebDriver Driver { get; }
+        public IWebDriver WrappedDriver { get; }
 
         public WebElement Get(string xpath)
         {
@@ -27,16 +29,16 @@
         }
         public WebElement Get(By locator)
         {
-            return new WebElement(locator, this.Driver);
+            return new WebElement(locator, this.WrappedDriver);
         }
         private WebElement Get(IWebElement implicitElement)
         {
-            return new WebElement(implicitElement, this.Driver);
+            return new WebElement(implicitElement, this.WrappedDriver);
         }
 
         public WebElement Locate(By locator)
         {
-            return new WebElement(locator, this.Driver).Locate();
+            return new WebElement(locator, this.WrappedDriver).Locate();
         }
         public WebElement Locate(By locator, double timeout, double implicitWait = -1)
         {
@@ -50,39 +52,40 @@
         public WebElement WaitForElement(By locator, double timeout, bool locate, double implicitWait = -1)
         {
             var element = this.Get(locator);
-            this.Driver.DoWithImplicitWait(() => element.WaitForPresent(timeout), implicitWait);
+            this.WrappedDriver.DoWithImplicitWait(() => element.WaitForPresent(timeout), implicitWait);
             return locate ? element.Locate() : element;
         }
+
         #region MyRegion
         public string Url
         {
-            get => Driver.Url;
-            set => Driver.Url = value;
+            get => WrappedDriver.Url;
+            set => WrappedDriver.Url = value;
         }
-        public string Title => this.Driver.Title;
-        public string PageSource => Driver.PageSource;
-        public string CurrentWindowHandle => Driver.CurrentWindowHandle;
-        public ReadOnlyCollection<string> WindowHandles => Driver.WindowHandles;
+        public string Title => this.WrappedDriver.Title;
+        public string PageSource => WrappedDriver.PageSource;
+        public string CurrentWindowHandle => WrappedDriver.CurrentWindowHandle;
+        public ReadOnlyCollection<string> WindowHandles => WrappedDriver.WindowHandles;
 
         public void Close()
         {
-            Driver.Close();
+            WrappedDriver.Close();
         }
         public void Quit()
         {
-            Driver.Quit();
+            WrappedDriver.Quit();
         }
         public IOptions Manage()
         {
-            return Driver.Manage();
+            return WrappedDriver.Manage();
         }
         public INavigation Navigate()
         {
-            return Driver.Navigate();
+            return WrappedDriver.Navigate();
         }
         public ITargetLocator SwitchTo()
         {
-            return Driver.SwitchTo();
+            return WrappedDriver.SwitchTo();
         }
 
         public IWebElement FindElement(By by)
@@ -91,11 +94,11 @@
         }
         public ReadOnlyCollection<IWebElement> FindElements(By by)
         {
-            return this.Driver.FindElements(by).Select(this.Get).Cast<IWebElement>().ToList().AsReadOnly();
+            return this.WrappedDriver.FindElements(by).Select(this.Get).Cast<IWebElement>().ToList().AsReadOnly();
         }
         public void Dispose()
         {
-            Driver.Dispose();
+            WrappedDriver.Dispose();
         }
         #endregion
     }

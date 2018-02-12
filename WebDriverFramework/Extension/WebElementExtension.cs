@@ -176,9 +176,9 @@ namespace WebDriverFramework.Extension
         public static IWebElement Unwrap(this IWebElement element)
         {
             var e = element;
-            while (e is IWrapsElement wrap)
+            while (e is IWrapsElement)
             {
-                e = wrap.WrappedElement;
+                e = (e as IWrapsElement).WrappedElement;
             }
 
             return e;

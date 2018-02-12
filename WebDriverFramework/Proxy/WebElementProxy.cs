@@ -2,15 +2,22 @@
 {
     using OpenQA.Selenium;
     using OpenQA.Selenium.Internal;
-    using OpenQA.Selenium.Remote;
     using OpenQA.Selenium.Support.PageObjects;
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using System.Runtime.Remoting;
     using System.Runtime.Remoting.Messaging;
 
-    public sealed class WebElementProxy : DriverObjectProxy, IWrapsElement
+    public class WebElementProxy : DriverObjectProxy, IWrapsElement, IRemotingTypeInfo
     {
+        private static List<Type> InterfacesToBeProxied => new List<Type>
+        {
+            typeof(IWebElement),
+            typeof(ILocatable),
+            typeof(IWrapsElement),
+        };
+
         private IWebElement cachedElement;
 
         /// <summary>
@@ -30,12 +37,9 @@
         public WebElementProxy(IWebElement element) : base(typeof(IWebElement), null, null, true)
         {
             this.cachedElement = element;
-            this.IsImplicit = true;
         }
 
-        public bool IsImplicit { get; }
-
-        public bool IsCached => cachedElement is RemoteWebElement;
+        public bool IsCached => cachedElement != null;
 
         /// <summary>
         /// Gets the <see cref="IWebElement"/> wrapped by this object.
@@ -78,6 +82,17 @@
             }
 
             return InvokeMethod(element, methodCallMessage);
+        }
+
+        public bool CanCastTo(Type fromType, object o)
+        {
+            return InterfacesToBeProxied.Contains(fromType);
+        }
+
+        public string TypeName
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
     }
 }

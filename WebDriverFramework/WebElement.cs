@@ -8,102 +8,35 @@ namespace WebDriverFramework
     using OpenQA.Selenium.Support.Extensions;
     using OpenQA.Selenium.Support.PageObjects;
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Drawing;
     using System.Linq;
 
-    public class ListWebElement : IElementList
-    {
-        private IList<IWebElement> _proxiedElements;
-
-        public ListWebElement(By locator, IWebDriver driver) : this(locator, null, driver)
-        {
-        }
-        public ListWebElement(By locator, WebElement parent, IWebDriver driver) : this(GetProxy(locator, parent, driver, false))
-        {
-            this.Locator = locator;
-            this.Parent = parent;
-            this.WrappedDriver = driver;
-        }
-        public ListWebElement(IList<IWebElement> proxiedElements)
-        {
-            this._proxiedElements = proxiedElements;
-        }
-
-        public List<WebElement> Elements => this._proxiedElements.Select(CreateElement).ToList();
-        public int Count => this.Elements.Count;
-        public WebElement this[int index] => this.Elements[index];
-
-        public IWebDriver WrappedDriver { get; }
-        public By Locator { get; }
-        public WebElement Parent { get; }
-
-        public List<WebElement> Get(By locator)
-        {
-            return this.Elements.Select(e => e.Get(locator)).ToList();
-        }
-        public WebElement GetByText(string text)
-        {
-            return this.Elements.FirstOrDefault(e => e.Text.Trim() == text);
-        }
-
-        public IElementList Locate()
-        {
-            this._proxiedElements = this.Elements.Select(e => e.Locate().Element).ToList();
-            return this;
-        }
-        public IElementList CheckStaleness()
-        {
-            this.Elements.ForEach(e => e.CheckStaleness());
-            return this;
-        }
-
-        public IEnumerator<WebElement> GetEnumerator()
-        {
-            return Elements.GetEnumerator();
-        }
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable)Elements).GetEnumerator();
-        }
-
-        private WebElement CreateElement(IWebElement element)
-        {
-            return new WebElement(element, this.WrappedDriver);
-        }
-        private static IList<IWebElement> GetProxy(By locator, WebElement parent, IWebDriver driver, bool cache)
-        {
-            return (IList<IWebElement>)new WebElementListProxy(typeof(IList<IWebElement>), new DefaultElementLocator((ISearchContext)parent?.WrappedElement ?? driver),
-                new[] { locator }, cache).GetTransparentProxy();
-        }
-    }
-
-    public class WebElement : IWebElement, IWrapsElement, IWrapsDriver
+    public class WebElement : IWebElement, IWrapsDriver, IWrapsElement
     {
         public WebElement(IWebElement implicitElement, IWebDriver driver) : this(implicitElement, null, driver)
         {
         }
         internal WebElement(IWebElement implicitElement, WebElement parent, IWebDriver driver) : this(driver)
         {
-            this.ProxyElement = new WebElementProxy(implicitElement);
+            this.WebElementProxy = new WebElementProxy(implicitElement);
             this.Parent = parent;
         }
-         
+
         public WebElement(By locator, IWebDriver driver) : this(locator, null, driver)
         {
         }
         public WebElement(By locator, WebElement parent, IWebDriver driver) : this(driver)
         {
             ISearchContext searchContext = parent?.WrappedElement ?? driver as ISearchContext;
-            this.ProxyElement = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(searchContext), new[] { locator }, false);
+            this.WebElementProxy = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(searchContext), new[] { locator }, false);
             this.Parent = parent;
         }
 
-        public WebElement(WebElementProxy proxyElement, IWebDriver driver) : this(driver)
+        public WebElement(WebElementProxy webElementProxy, IWebDriver driver) : this(driver)
         {
-            this.ProxyElement = proxyElement;
+            this.WebElementProxy = webElementProxy;
         }
         private WebElement(IWebDriver driver)
         {
@@ -111,18 +44,28 @@ namespace WebDriverFramework
         }
 
         public IWebElement Element => this.WrappedElement.Unwrap();
-        public IWebElement WrappedElement => this.ProxyElement.WrappedElement;
-        private WebElementProxy ProxyElement { get; }
+        public IWebElement WrappedElement => (IWebElement)this.WebElementProxy.GetTransparentProxy();
+
+        public double FindTimeout { get; set; } = 30;
+
+        public IWebElement Element1
+        {
+            get
+            {
+                return  this._Driver.Wait(() => this.WrappedElement.Unwrap(), this.FindTimeout);
+            }
+        }
+
+        private WebElementProxy WebElementProxy { get; }
 
         public IWebDriver WrappedDriver { get; }
         private WebDriver _Driver => new WebDriver(WrappedDriver);
 
-        public List<By> Locators => this.ProxyElement.Bys.ToList();
+        public List<By> Locators => this.WebElementProxy.Bys.ToList();
         public By Locator => Locators.First();
         public WebElement Parent { get; }
 
-        public bool IsImplicit => this.ProxyElement.IsImplicit;
-        public bool IsCached => this.ProxyElement.IsCached;
+        public bool IsCached => this.WebElementProxy.IsCached;
 
         public bool Exist
         {
