@@ -70,14 +70,15 @@ namespace ConsoleApp1
             var pr = new Program(driver);
             try
             {
-                var z = pr.Test as IWebElement;
+                var z = pr.Test as ISearchContext;
                 var y = z.GetType();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
-            var abc = pr.element1.Element as IWrapsElement;
+            var abc = pr.element1.WrappedElement as IWrapsElement;
+            var aasdbc = pr.element1.WrappedElement as IWebDriver;
             new Actions(driver).KeyDown(pr.Test, "s");
             Console.WriteLine(driver.GetImplicitWait());
             driver.DoWithImplicitWait(() =>

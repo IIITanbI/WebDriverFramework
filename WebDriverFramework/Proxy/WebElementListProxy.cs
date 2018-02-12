@@ -10,7 +10,7 @@
     /// <summary>
     /// Represents a proxy class for a list of elements to be used with the PageFactory.
     /// </summary>
-    internal class WebElementListProxy : DriverObjectProxy
+    public class WebElementListProxy : DriverObjectProxy
     {
         private List<IWebElement> cachedElements;
 
