@@ -1,20 +1,14 @@
 ﻿namespace WebDriverFramework
 {
-    using Extension;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Internal;
     using System.Collections.ObjectModel;
-    using System.Linq;
 
     public class WebDriver : IWebDriver, IWrapsDriver
     {
-        public double ImplicitWait => WebDriverImplicitWaitHelper.GetHelper(this).ImplicitWait;
-        public double InitialImplicitWait => WebDriverImplicitWaitHelper.GetHelper(this).InitialImplicitWait;
-
-        public WebDriver(IWebDriver driver, double implicitWait = 0)
+        public WebDriver(IWebDriver driver)
         {
             this.WrappedDriver = driver;
-            WebDriverImplicitWaitHelper.RegisterDriver(this, implicitWait);
         }
 
         public IWebDriver WrappedDriver { get; }
@@ -27,18 +21,22 @@
         {
             return new WebElement(locator, this.WrappedDriver);
         }
-        private WebElement Get(IWebElement implicitElement)
+        public ListWebElement GetAll(By locator)
         {
-            return new WebElement(implicitElement, this.WrappedDriver);
+            return new ListWebElement(locator, this.WrappedDriver);
+        }
+        public ListWebElement GetAll(string xpath)
+        {
+            return GetAll(By.XPath(xpath));
         }
 
-        public WebElement WaitForElement(By locator, double timeout = -1)
+        public WebElement WaitForPresent(By locator, double timeout = -1)
         {
-            return this.Get(locator).WaitForPresent(timeout);
+            return this.Get(locator).WaitUntil(Condition.Exist, timeout);
         }
-        public WebElement WaitForElement(string xpath, double timeout = -1)
+        public WebElement WaitForPresent(string xpath, double timeout = -1)
         {
-            return WaitForElement(By.XPath(xpath), timeout);
+            return WaitForPresent(By.XPath(xpath), timeout);
         }
 
         #region MyRegion
@@ -75,11 +73,11 @@
 
         public IWebElement FindElement(By by)
         {
-            return this.Get(by).Locate();
+            return this.WrappedDriver.FindElement(by);
         }
         public ReadOnlyCollection<IWebElement> FindElements(By by)
         {
-            return this.WrappedDriver.FindElements(by).Select(this.Get).Cast<IWebElement>().ToList().AsReadOnly();
+            return this.WrappedDriver.FindElements(by);
         }
         public void Dispose()
         {

@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -22,7 +23,6 @@ using WebDriverFramework;
 using WebDriverFramework.Extension;
 using WebDriverFramework.PageFactory;
 using WebDriverFramework.PageFactory.Attributes;
-
 namespace ConsoleApp1
 {
     class Program
@@ -54,6 +54,21 @@ namespace ConsoleApp1
             CustomPageFactory.InitElements(this, driver, new CustomPageObjectMemberDecorator(driver.WrappedDriver));
         }
 
+        public static void AssertTrue(bool value)
+        {
+            if (!value)
+            {
+                throw new Exception("value is not true");
+            }
+        }
+
+        public static void AssertFalse(bool value)
+        {
+            if (value)
+            {
+                throw new Exception("value is not false");
+            }
+        }
         static void Main(string[] args)
         {
             //IWebDriver _driver = new FirefoxDriver(new FirefoxOptions(){BrowserExecutableLocation = "C:\\Program Files\\Mozilla Firefox\\firefox.exe" });
@@ -62,89 +77,93 @@ namespace ConsoleApp1
             //    IntroduceInstabilityByIgnoringProtectedModeSettings = true,
             //    IgnoreZoomLevel = true
             //});
-            WebElement.DefaultElementSearchTimeout = 60;
+            //WebElement.DefaultElementSearchTimeout = 60;
 
-            IWebDriver _driver = new ChromeDriver();
+            var opt = new ChromeOptions();
+            opt.AddArgument("disable-infobars");
+
+            var _driver = new ChromeDriver(opt);
             var driver = new WebDriver(_driver);
             driver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
+           // driver.Navigate().GoToUrl("https://onliner.by");
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
             var pr = new Program(driver);
-            try
-            {
-                var z = pr.Test as ISearchContext;
-                var y = z.GetType();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-            var abc = pr.element1.WrappedElement as IWrapsElement;
-            var aasdbc = pr.element1.WrappedElement as IWebDriver;
-            new Actions(driver).KeyDown(pr.Test, "s");
-            Console.WriteLine(driver.GetImplicitWait());
-            driver.DoWithImplicitWait(() =>
-            {
-                {
-                    var sw = Stopwatch.StartNew();
-                    var exist = driver.Get("sadlkjaslkjd").Exist;
-                    sw.Stop();
-                    Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
-                }
-                Console.WriteLine(driver.GetImplicitWait());
-                driver.DoWithImplicitWait(() =>
-                {
-                    {
-                        var sw = Stopwatch.StartNew();
-                        var exist = driver.Get("sadlkjaslkjd").Exist;
-                        sw.Stop();
-                        Console.WriteLine("lvl 2 :" + sw.ElapsedMilliseconds);
-                        Console.WriteLine(driver.GetImplicitWait());
-                    }
-                }, 5);
-                Console.WriteLine(driver.GetImplicitWait());
-                {
-                    var sw = Stopwatch.StartNew();
-                    var exist = driver.Get("sadlkjaslkjd").Exist;
-                    sw.Stop();
-                    Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
-                    Console.WriteLine(driver.GetImplicitWait());
-                }
-            }, 20);
-            Console.WriteLine(driver.GetImplicitWait());
+            //Console.WriteLine(driver.GetImplicitWait());
+            //driver.DoWithImplicitWait(() =>
+            //{
+            //    {
+            //        var sw = Stopwatch.StartNew();
+            //        var exist = driver.Get("sadlkjaslkjd").Exist;
+            //        sw.Stop();
+            //        Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
+            //    }
+            //    Console.WriteLine(driver.GetImplicitWait());
+            //    driver.DoWithImplicitWait(() =>
+            //    {
+            //        {
+            //            var sw = Stopwatch.StartNew();
+            //            var exist = driver.Get("sadlkjaslkjd").Exist;
+            //            sw.Stop();
+            //            Console.WriteLine("lvl 2 :" + sw.ElapsedMilliseconds);
+            //            Console.WriteLine(driver.GetImplicitWait());
+            //        }
+            //    }, 5);
+            //    Console.WriteLine(driver.GetImplicitWait());
+            //    {
+            //        var sw = Stopwatch.StartNew();
+            //        var exist = driver.Get("sadlkjaslkjd").Exist;
+            //        sw.Stop();
+            //        Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
+            //        Console.WriteLine(driver.GetImplicitWait());
+            //    }
+            //}, 20);
+            //Console.WriteLine(driver.GetImplicitWait());
 
-            var w = driver.WaitForElement(".//[@class='test']", 10);
-            var f = driver.Get(".//[@class='test']").SetSearchElementTimeout(10).WaitForPresent(10);
-            var g = driver.Get(".//[@class='test']").WaitForPresent(10);
-            var v = driver.WaitForElement(".//[@class='test']", 10);
-            Console.WriteLine(driver.GetImplicitWait());
-            driver.DoWithImplicitWait(() =>
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+           // Console.WriteLine(driver.GetImplicitWait());
             {
                 {
                     var sw = Stopwatch.StartNew();
-                    var exist = driver.Get("sadlkjaslkjd").SetSearchElementTimeout(10).Exist;
+                    driver.Get("sadlkjaslkjd").Wait(Condition.Displayed, 20);
+                    var exi2t = driver.Get(".//*[@class='test']").Locate().WaitUntil(Condition.NotExist);
+                    var exi3t = driver.Get("sadlkjaslkjd").Wait(Condition.Exist, 20);
+                    var exiat = driver.Get("sadlkjaslkjd");
+                    var exsiat = driver.Get("sadlkjaslkjd").ShouldBe(Condition.Exist);
+                    var exs2at = driver.Get("sadlkjaslkjd").ShouldNot(Condition.Exist);
+                    // var eaiatj = driver.Get("sadlkjaslkjd").ShouldBe(e => e.Exist);
+                    AssertTrue(exiat.Displayed);
+                    // AssertTrue(exiat.ShouldBe(e => e.Exist, 20));
+                    // AssertTrue(exiat.ShouldBe(Condition.NotExist, 20));
                     sw.Stop();
                     Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
                 }
                 Console.WriteLine(driver.GetImplicitWait());
-                driver.DoWithImplicitWait(() =>
                 {
                     {
                         var sw = Stopwatch.StartNew();
-                        var exist = driver.Get("sadlkjaslkjd").Exist;
+                        var exist = driver.Get("sadlkjaslkjd").WaitUntil(Condition.Exist, 10).Exist;
+                        var isexist = driver.Get("sadlkjaslkjd").Wait(Condition.Exist, 10);
+                        var issist = driver.Get("sadlkjaslkjd").WaitUntil(Condition.Exist, 10);
+                        var is1ist = driver.Get("sadlkjaslkjd").WaitUntil(zl => zl.Text == "test", 10);
+
+                       
+                        var isesist = driver.Get("sadlkjaslkjd").TryWait(ee => ee.Exist);
                         sw.Stop();
                         Console.WriteLine("lvl 2 :" + sw.ElapsedMilliseconds);
                         Console.WriteLine(driver.GetImplicitWait());
                     }
-                }, 5);
+                };
                 Console.WriteLine(driver.GetImplicitWait());
                 {
                     var sw = Stopwatch.StartNew();
-                    var exist = driver.Get("sadlkjaslkjd").Exist;
+                    //var exist = driver.Get("sadlkjaslkjd").SetSearchElementTimeout(20).Exist;
                     sw.Stop();
                     Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
                     Console.WriteLine(driver.GetImplicitWait());
                 }
-            }, 20);
+            };
             Console.WriteLine(driver.GetImplicitWait());
 
 
@@ -155,29 +174,17 @@ namespace ConsoleApp1
             test.Locate();
             var test1 = elements.ToList();
             var rrrrr = pr.element1.Get(".").Locate();
-            if (driver.WaitForElement(By.XPath("some"), 10).Get("myxpath").Exist)
+            if (driver.WaitForPresent(By.XPath("some"), 10).Get("myxpath").Exist)
             {
 
             }
-
-            if (driver.Get("some").WaitForPresent(10).Get("myxpath").Exist is var el)
-            {
-            }
-
-            var rr2 = new WebElement(By.XPath("some"), driver.WrappedDriver);
-            var rr3 = driver.WaitForElement(By.XPath("some"), 10);
-            var rr4 = new WebElement(By.XPath("some"), _driver).WaitForPresent(10);
-            var rr5 = driver.Get(By.XPath("some")).WaitForPresent(10);
-            //driver.WaitForPresent(TimeSpan.FromSeconds(5), pr.element2);
-            //var el = pr.element2.Element.WaitForElementDisplayed(TimeSpan.MaxValue);
+     
             ListWebElement l = new ListWebElement(By.XPath("wqe"), _driver);
 
 
-            var elem = pr.element1.Get("asd").WaitForPresent(10).Get(".//test").Text;
+            var elem = pr.element1.Get("asd").WaitUntil(Condition.Exist, 10).Get(".//test").Text;
             var result = pr.element1.Get(".//test").Locate();
             var ggg = pr.element1.Displayed;
-            var gg = pr.element1.WaitForElementDisplayed(10);
-            var res1 = driver.FindElement(By.XPath(".//*")).Displayed;
             pr.element1 = new WebElement(By.XPath("//div[@class='test']"), driver.WrappedDriver);
             var vis = pr.element2.Text;
             var vis3 = pr.element3.Text;

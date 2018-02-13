@@ -2,19 +2,17 @@
 {
     using Extension;
     using OpenQA.Selenium;
-    using OpenQA.Selenium.Internal;
     using OpenQA.Selenium.Support.Extensions;
     using OpenQA.Selenium.Support.PageObjects;
     using Proxy;
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Drawing;
     using System.Linq;
 
-    public class WebElement : IWebElement, IWrapsDriver, IWrapsElement
+    public class WebElement
     {
-        private WebElementProxy WebElementProxy;
+        private WebElementProxy _webElementProxy;
         private double _elementSearchTimeout;
 
         public WebElement(IWebElement implicitElement, IWebDriver driver) : this(implicitElement, null, driver)
@@ -22,7 +20,7 @@
         }
         internal WebElement(IWebElement implicitElement, WebElement parent, IWebDriver driver) : this(driver)
         {
-            this.WebElementProxy = new WebElementProxy(implicitElement);
+            this._webElementProxy = new WebElementProxy(implicitElement);
             this.Parent = parent;
         }
 
@@ -32,44 +30,42 @@
         public WebElement(By locator, WebElement parent, IWebDriver driver) : this(driver)
         {
             ISearchContext searchContext = parent?.WrappedElement ?? driver as ISearchContext;
-            this.WebElementProxy = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(searchContext), new[] { locator }, false);
+            this._webElementProxy = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(searchContext),
+                new[] { locator }, false);
             this.Parent = parent;
         }
 
         public WebElement(WebElementProxy webElementProxy, IWebDriver driver) : this(driver)
         {
-            this.WebElementProxy = webElementProxy;
+            this._webElementProxy = webElementProxy;
         }
         private WebElement(IWebDriver driver)
         {
             this.WrappedDriver = driver;
-            this.SetSearchElementTimeout(DefaultElementSearchTimeout);
         }
 
-        public static double DefaultElementSearchTimeout { get; set; } = 30;
-        public double ElementSearchTimeout
-        {
-            get => _elementSearchTimeout;
-            set => _elementSearchTimeout = ResolveTime(value, DefaultElementSearchTimeout);
-        }
-        public double WaitTimeout { get; set; } = 60;
+        public static double WaitTimeout { get; set; } = 60;
 
         public IWebDriver WrappedDriver { get; }
-        public IWebElement WrappedElement => (IWebElement)this.WebElementProxy.GetTransparentProxy();
-        public IWebElement Element => this.WrappedDriver.Wait(() => this.WrappedElement.Unwrap(), this.ElementSearchTimeout);
+        public IWebElement WrappedElement => this._webElementProxy.IsImplicitSet ?
+                                                this._webElementProxy.WrappedElement
+                                                : (IWebElement)this._webElementProxy.GetTransparentProxy();
 
-        public List<By> Locators => this.WebElementProxy.Bys.ToList();
+        public IWebElement Element => this.WrappedElement.Unwrap();
+
+        public List<By> Locators => this._webElementProxy.Bys.ToList();
         public By Locator => Locators.First();
         public WebElement Parent { get; }
 
-        public bool IsCached => this.WebElementProxy.IsCached;
+        public bool IsCached => this._webElementProxy.IsCached;
+
         public bool Exist
         {
             get
             {
                 try
                 {
-                    StubActionOnElement();
+                    CheckStaleness();
                     return true;
                 }
                 catch (NoSuchElementException)
@@ -79,25 +75,6 @@
                 catch (StaleElementReferenceException)
                 {
                     return false;
-                }
-            }
-        }
-        public bool IsStale
-        {
-            get
-            {
-                try
-                {
-                    StubActionOnElement();
-                    return true;
-                }
-                catch (NoSuchElementException)
-                {
-                    return false;
-                }
-                catch (StaleElementReferenceException)
-                {
-                    return true;
                 }
             }
         }
@@ -107,7 +84,6 @@
             StubActionOnElement();
             return this;
         }
-
         public WebElement StubActionOnElement()
         {
             //call any property on element
@@ -117,38 +93,23 @@
 
         public WebElement Get(string xpath)
         {
-            return Get(xpath, DefaultElementSearchTimeout);
-        }
-        public WebElement Get(string xpath, double searchTimeout)
-        {
-            return Get(By.XPath(xpath), searchTimeout);
+            return Get(By.XPath(xpath));
         }
         public WebElement Get(By locator)
         {
-            return Get(locator, DefaultElementSearchTimeout);
+            return new WebElement(locator, this, this.WrappedDriver);
         }
-        public WebElement Get(By locator, double searchTimeout)
-        {
-            return new WebElement(locator, this, this.WrappedDriver).SetSearchElementTimeout(searchTimeout);
-        }
-
-        private WebElement Get(IWebElement implicitElement)
-        {
-            return new WebElement(implicitElement, this, this.WrappedDriver);
-        }
-
-        public IElementList GetAll(By locator)
+        public ListWebElement GetAll(By locator)
         {
             return new ListWebElement(locator, this, this.WrappedDriver);
         }
-        public IElementList GetAll(string xpath)
+        public ListWebElement GetAll(string xpath)
         {
             return GetAll(By.XPath(xpath));
         }
-
         public WebElement Locate()
         {
-            return this.IsCached ? this : new WebElement(this.Element, this.WrappedDriver);
+            return new WebElement(this.Element, this.WrappedDriver);
         }
 
         #region JS
@@ -163,34 +124,39 @@
         public void JSScrollTo()
         {
             var elem = this.Element;
-            this.WrappedDriver.ExecuteJavaScript($"window.scrollTo({elem.Location.X}, {elem.Location.Y})", this.Element);
+            this.WrappedDriver.ExecuteJavaScript($"window.scrollTo({elem.Location.X}, {elem.Location.Y})",
+                this.Element);
         }
         #endregion
 
         #region MyRegion
-        public string TagName => Element.TagName;
+        public bool Displayed => Element.Displayed;
         public string Text => TagName == "input" ? GetAttribute("value") : Element.Text;
         public bool Enabled => Element.Enabled;
         public bool Selected => Element.Selected;
+        public string TagName => Element.TagName;
         public Point Location => Element.Location;
         public Size Size => Element.Size;
-        public bool Displayed => Element.Displayed;
 
-        public void Clear()
+        public WebElement Clear()
         {
             Element.Clear();
+            return this;
         }
-        public void SendKeys(string text)
+        public WebElement SendKeys(string text)
         {
             Element.SendKeys(text);
+            return this;
         }
-        public void Submit()
+        public WebElement Submit()
         {
             Element.Submit();
+            return this;
         }
-        public void Click()
+        public WebElement Click()
         {
             Element.Click();
+            return this;
         }
         public string GetAttribute(string attributeName)
         {
@@ -204,140 +170,41 @@
         {
             return Element.GetCssValue(propertyName);
         }
-
-        public IWebElement FindElement(By by)
-        {
-            return this.Get(by).Locate();
-        }
-        public ReadOnlyCollection<IWebElement> FindElements(By by)
-        {
-            return Element.FindElements(by).Select(this.Get).Cast<IWebElement>().ToList().AsReadOnly();
-        }
         #endregion
 
         #region Wait
-        public T Wait<T>(Func<T> condition, double timeout, params Type[] exceptionTypes)
+        public T Wait<T>(Func<WebElement, T> condition, double timeout = -1, params Type[] exceptionTypes)
         {
-            timeout = ResolveTime(timeout, this.WaitTimeout);
-            return this.WrappedDriver.GetWait(timeout, exceptionTypes).Until(condition);
+            timeout = ResolveTime(timeout, WaitTimeout);
+            return this.WrappedDriver.Wait(d => condition(this), timeout, exceptionTypes);
         }
-        public T Wait<T>(Func<IWebDriver, T> condition, double timeout, params Type[] exceptionTypes)
+        public bool TryWait(Func<WebElement, bool> condition, double timeout = -1, params Type[] exceptionTypes)
         {
-            timeout = ResolveTime(timeout, this.WaitTimeout);
-            return this.WrappedDriver.GetWait(timeout, exceptionTypes).Until(condition);
-        }
-
-        public WebElement WaitForPresent(double timeout = -1)
-        {
-            Wait(() =>
+            try
             {
-                try
-                {
-                    this.StubActionOnElement();
-                    return true;
-                }
-                catch (StaleElementReferenceException) when (!this.IsCached)
-                {
-                    return false;
-                }
-            }, timeout);
-            return this;
-        }
-        public WebElement WaitForNotPresent(double timeout = -1)
-        {
-            Wait(() =>
-            {
-                try
-                {
-                    this.StubActionOnElement();
-                    return true;
-                }
-                catch (NoSuchElementException)
-                {
-                    return true;
-                }
-                catch (StaleElementReferenceException)
-                {
-                    return true;
-                }
-            }, timeout);
-
-            return this;
-        }
-
-        public WebElement WaitForElementDisplayed(double timeout = -1)
-        {
-            Wait(() =>
-            {
-                try
-                {
-                    return this.Element.Displayed;
-                }
-                catch (StaleElementReferenceException) when (!this.IsCached)
-                {
-                    return false;
-                }
-            }, timeout);
-
-            return this;
-        }
-        public WebElement WaitForElementNotDisplayed(double timeout = -1)
-        {
-            Wait(() =>
-            {
-                try
-                {
-                    return !this.Element.Displayed;
-                }
-                catch (NoSuchElementException)
-                {
-                    return true;
-                }
-                catch (StaleElementReferenceException)
-                {
-                    return true;
-                }
-            }, timeout);
-
-            return this;
-        }
-
-        public WebElement WaitForElementClickable(double timeout = -1)
-        {
-            Wait(() =>
-            {
-                try
-                {
-                    return this.Element.Enabled;
-                }
-                catch (StaleElementReferenceException) when (!this.IsCached)
-                {
-                    return false;
-                }
-            }, timeout);
-
-            return this;
-        }
-
-        private bool? ProcessException(Exception ex, bool staleElementReferenceException, bool noSuchElementException = false)
-        {
-            switch (ex)
-            {
-                case StaleElementReferenceException s when staleElementReferenceException || !this.IsCached:
-                    return staleElementReferenceException;
-                case NoSuchElementException n:
-                    return noSuchElementException;
+                return this.Wait(condition, timeout, exceptionTypes);
             }
+            catch (WebDriverTimeoutException)
+            {
+                return false;
+            }
+        }
+        public WebElement WaitUntil(Func<WebElement, bool> condition, double timeout = -1, params Type[] exceptionTypes)
+        {
+            this.Wait(condition, timeout, exceptionTypes);
+            return this;
+        }
 
-            return null;
+        public bool ShouldBe(Func<WebElement, bool> condition, double timeout = -1, params Type[] exceptionTypes)
+        {
+            return this.TryWait(condition, timeout, exceptionTypes);
+        }
+        public bool ShouldNot(Func<WebElement, bool> condition, double timeout = -1, params Type[] exceptionTypes)
+        {
+            return this.TryWait(e => !condition(e), timeout, exceptionTypes);
         }
         #endregion
 
-        public WebElement SetSearchElementTimeout(double timeout)
-        {
-            this.ElementSearchTimeout = timeout;
-            return this;
-        }
-        private double ResolveTime(double time, double defaultValue) => time < 0 ? defaultValue : time;
+        private static double ResolveTime(double time, double currentValue) => time < 0 ? currentValue : time;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace WebDriverFramework.Proxy
+﻿using OpenQA.Selenium.Remote;
+
+namespace WebDriverFramework.Proxy
 {
     using OpenQA.Selenium;
     using OpenQA.Selenium.Internal;
@@ -37,9 +39,11 @@
         public WebElementProxy(IWebElement element) : base(typeof(IWebElement), null, null, true)
         {
             this.cachedElement = element;
+            this.IsImplicitSet = true;
         }
 
-        public bool IsCached => cachedElement != null;
+        public bool IsCached => cachedElement is RemoteWebElement;
+        public bool IsImplicitSet { get; }
 
         /// <summary>
         /// Gets the <see cref="IWebElement"/> wrapped by this object.

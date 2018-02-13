@@ -16,9 +16,9 @@
         /// thrown if a field or property decorated with the <see cref="OpenQA.Selenium.Support.PageObjects.FindsByAttribute"/> is not of type
         /// <see cref="IWebElement"/> or IList{IWebElement}.
         /// </exception>
-        public static void InitElements(object page, WebDriver driver, IPageObjectMemberDecorator decorator)
+        public static void InitElements(object page, IWebDriver driver, IPageObjectMemberDecorator decorator)
         {
-            InitElements(page, new DefaultElementLocator(driver.WrappedDriver), decorator);
+            InitElements(page, new DefaultElementLocator(driver), decorator);
         }
 
         /// <summary>
