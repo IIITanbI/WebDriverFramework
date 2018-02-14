@@ -7,7 +7,7 @@
     {
         public static T Until<T, TInput>(this IWait<TInput> wait, Func<T> condition)
         {
-            return wait.Until((TInput input) => condition());
+            return wait.Until(input => condition());
         }
     }
 }

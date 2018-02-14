@@ -56,8 +56,7 @@
                 if (typeof(WebElement).IsAssignableFrom(targetType))
                 {
                     var proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
-                    var args = new object[] { proxyElement, this._driver };
-                    result = Activator.CreateInstance(targetType, args);
+                    result = new WebElement(proxyElement, this._driver);
                 }
                 else if (typeof(IWebElement).IsAssignableFrom(targetType))
                 {
@@ -69,6 +68,11 @@
                     //var proxyElements = new ProxyListElement(locator, bys, cache);
                     //var args = new object[] { proxyElements, this._driver };
                     //result = Activator.CreateInstance(targetType, args);
+                }
+                else if (targetType == typeof(ListWebElement))
+                {
+                    var proxyElement = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache);
+                    result = new ListWebElement(proxyElement, this._driver);
                 }
                 else if (targetType == typeof(IList<IWebElement>))
                 {

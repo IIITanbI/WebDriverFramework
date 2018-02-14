@@ -11,38 +11,37 @@
 
     public class WebElement
     {
+        public static double DefaultWaitTimeout { get; set; } = 60;
+
         private WebElementProxy _webElementProxy;
 
-        public WebElement(IWebElement implicitElement, IWebDriver driver)
-            : this(new WebElementProxy(implicitElement), driver)
+        public WebElement(IWebElement implicitElement, IWebDriver driver) : this(new WebElementProxy(implicitElement), driver)
         {
         }
-        public WebElement(IWebElement implicitElement, WebElement parent)
-            : this(new WebElementProxy(implicitElement), parent)
-        {
-        }
-
-        public WebElement(By locator, IWebDriver driver) 
-            : this(new WebElementProxy(driver, locator), driver)
-        {
-        }
-        public WebElement(By locator, WebElement parent) 
-            : this(new WebElementProxy(parent.WrappedElement, locator), parent)
+        public WebElement(IWebElement implicitElement, WebElement parent) : this(new WebElementProxy(implicitElement), parent)
         {
         }
 
-        public WebElement(WebElementProxy webElementProxy, WebElement parent) : this(webElementProxy, parent.WrappedDriver)
+        public WebElement(By locator, IWebDriver driver) : this(new WebElementProxy(driver, locator), driver)
         {
-            this.Parent = parent;
         }
-        public WebElement(WebElementProxy webElementProxy, IWebDriver driver) 
+        public WebElement(By locator, WebElement parent) : this(new WebElementProxy(parent.WrappedElement, locator), parent)
+        {
+        }
+
+        public WebElement(WebElementProxy webElementProxy, IWebDriver driver) : this(webElementProxy, null, driver)
+        {
+        }
+        public WebElement(WebElementProxy webElementProxy, WebElement parent) : this(webElementProxy, parent, parent.WrappedDriver)
+        {
+        }
+
+        private WebElement(WebElementProxy webElementProxy, WebElement parent, IWebDriver driver)
         {
             this._webElementProxy = webElementProxy;
+            this.Parent = parent;
             this.WrappedDriver = driver;
         }
-       
-
-        public static double DefaultWaitTimeout { get; set; } = 60;
 
         public IWebDriver WrappedDriver { get; }
         public IWebElement WrappedElement => (IWebElement)this._webElementProxy.GetTransparentProxy();
@@ -99,7 +98,7 @@
 
         public WebElement Locate()
         {
-            return new WebElement(this.Element, this.WrappedDriver);
+            return this.Parent != null ? new WebElement(this.Element, this.Parent) : new WebElement(this.Element, this.WrappedDriver);
         }
 
         #region JS

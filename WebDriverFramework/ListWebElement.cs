@@ -1,7 +1,6 @@
 ﻿namespace WebDriverFramework
 {
     using OpenQA.Selenium;
-    using OpenQA.Selenium.Support.PageObjects;
     using Proxy;
     using System.Collections;
     using System.Collections.Generic;
@@ -11,22 +10,32 @@
     {
         private WebElementListProxy _webElementsProxy;
 
-        public ListWebElement(By locator, IWebDriver driver) : this(locator, null, driver)
+        public ListWebElement(List<IWebElement> elements, IWebDriver driver) : this(new WebElementListProxy(elements), driver)
         {
         }
-        public ListWebElement(By locator, WebElement parent) : this(locator, parent, parent.WrappedDriver)
+        public ListWebElement(List<IWebElement> elements, WebElement parent) : this(new WebElementListProxy(elements), parent)
         {
         }
-        private ListWebElement(By locator, WebElement parent, IWebDriver driver)
+
+        public ListWebElement(By locator, IWebDriver driver) : this(new WebElementListProxy(driver, locator), driver)
         {
-            this.Locator = locator;
+        }
+        public ListWebElement(By locator, WebElement parent) : this(new WebElementListProxy(parent.WrappedElement, locator), parent)
+        {
+        }
+
+        public ListWebElement(WebElementListProxy webElementsProxy, IWebDriver driver) : this(webElementsProxy, null, driver)
+        {
+        }
+        public ListWebElement(WebElementListProxy webElementsProxy, WebElement parent) : this(webElementsProxy, parent, parent.WrappedDriver)
+        {
+        }
+
+        private ListWebElement(WebElementListProxy webElementsProxy, WebElement parent, IWebDriver driver)
+        {
+            this._webElementsProxy = webElementsProxy;
             this.Parent = parent;
             this.WrappedDriver = driver;
-            this._webElementsProxy = new WebElementListProxy(typeof(IList<IWebElement>), new DefaultElementLocator(parent?.WrappedElement ?? (ISearchContext)driver), new[] { locator }, false);
-        }
-        private ListWebElement(List<IWebElement> elements)
-        {
-            this._webElementsProxy = new WebElementListProxy(elements);
         }
 
         public List<WebElement> Elements => this._webElementsProxy.Elements.Select(CreateElement).ToList();
@@ -34,7 +43,8 @@
         public WebElement this[int index] => this.Elements[index];
 
         public IWebDriver WrappedDriver { get; }
-        public By Locator { get; }
+        public List<By> Locators => this._webElementsProxy.Bys.ToList();
+        public By Locator => Locators.First();
         public WebElement Parent { get; }
 
         public List<WebElement> Get(By locator)
@@ -48,7 +58,8 @@
 
         public ListWebElement Locate()
         {
-            return new ListWebElement(this.Elements.Select(e => e.Locate().Element).ToList());
+            var elements = this.Elements.Select(e => e.Locate().Element).ToList();
+            return this.Parent != null ? new ListWebElement(elements, this.Parent) : new ListWebElement(elements, this.WrappedDriver);
         }
         public ListWebElement CheckStaleness()
         {

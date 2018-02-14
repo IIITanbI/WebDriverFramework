@@ -14,20 +14,18 @@
     {
         private List<IWebElement> cachedElements;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WebElementListProxy"/> class.
-        /// </summary>
-        /// <param name="typeToBeProxied">The <see cref="Type"/> of object for which to create a proxy.</param>
-        /// <param name="locator">The <see cref="IElementLocator"/> implementation that
-        /// determines how elements are located.</param>
-        /// <param name="bys">The list of methods by which to search for the elements.</param>
-        /// <param name="shouldCached"><see langword="true"/> to shouldCached the lookup to the element; otherwise, <see langword="false"/>.</param>
+        public WebElementListProxy(ISearchContext searchContext, By by, bool shouldCached = false)
+            : this(typeof(IList<IWebElement>), new DefaultElementLocator(searchContext), new[] { by }, shouldCached)
+        {
+        }
+
         public WebElementListProxy(Type typeToBeProxied, IElementLocator locator, IEnumerable<By> bys, bool shouldCached)
             : base(typeToBeProxied, locator, bys, shouldCached)
         {
         }
+
         public WebElementListProxy(List<IWebElement> elements)
-            : base(typeof(IList<IWebElement>), null, null, false)
+            : this(typeof(IList<IWebElement>), null, null, false)
         {
             this.cachedElements = elements;
         }

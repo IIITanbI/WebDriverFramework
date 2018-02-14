@@ -116,9 +116,5 @@
         {
             return driver.GetWait(timeout, exceptionTypes).Until(condition);
         }
-        public static T Wait<T>(this IWebDriver driver, Func<T> condition, double timeout, params Type[] exceptionTypes)
-        {
-            return driver.GetWait(timeout, exceptionTypes).Until(condition);
-        }
     }
 }
