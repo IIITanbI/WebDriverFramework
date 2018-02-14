@@ -23,14 +23,12 @@ using WebDriverFramework;
 using WebDriverFramework.Extension;
 using WebDriverFramework.PageFactory;
 using WebDriverFramework.PageFactory.Attributes;
+using WebDriverFramework.Proxy;
+
 namespace ConsoleApp1
 {
     class Program
     {
-        public static void DoComething()
-        {
-
-        }
         [FindsBy(How = How.XPath, Using = "//div[@class='test']")]
         [ByXPath("//div[@class='test']")]
         public IWebElement Test = null;
@@ -79,50 +77,23 @@ namespace ConsoleApp1
             //});
             //WebElement.DefaultElementSearchTimeout = 60;
 
+            var map = typeof(WebDriver).GetInterfaceMap(typeof(IWebDriver));
             var opt = new ChromeOptions();
             opt.AddArgument("disable-infobars");
 
             var _driver = new ChromeDriver(opt);
             var driver = new WebDriver(_driver);
             driver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
-           // driver.Navigate().GoToUrl("https://onliner.by");
+            // driver.Navigate().GoToUrl("https://onliner.by");
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
             var pr = new Program(driver);
-            //Console.WriteLine(driver.GetImplicitWait());
-            //driver.DoWithImplicitWait(() =>
-            //{
-            //    {
-            //        var sw = Stopwatch.StartNew();
-            //        var exist = driver.Get("sadlkjaslkjd").Exist;
-            //        sw.Stop();
-            //        Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
-            //    }
-            //    Console.WriteLine(driver.GetImplicitWait());
-            //    driver.DoWithImplicitWait(() =>
-            //    {
-            //        {
-            //            var sw = Stopwatch.StartNew();
-            //            var exist = driver.Get("sadlkjaslkjd").Exist;
-            //            sw.Stop();
-            //            Console.WriteLine("lvl 2 :" + sw.ElapsedMilliseconds);
-            //            Console.WriteLine(driver.GetImplicitWait());
-            //        }
-            //    }, 5);
-            //    Console.WriteLine(driver.GetImplicitWait());
-            //    {
-            //        var sw = Stopwatch.StartNew();
-            //        var exist = driver.Get("sadlkjaslkjd").Exist;
-            //        sw.Stop();
-            //        Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
-            //        Console.WriteLine(driver.GetImplicitWait());
-            //    }
-            //}, 20);
-            //Console.WriteLine(driver.GetImplicitWait());
+            var p1 = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(driver), new[] {By.XPath(".//*")}, true);
+            //Console.WriteLine(p1.WrappedElement.TagName);
+            var p2 = new WebElementProxy((IWebElement)p1.GetTransparentProxy());
 
+            Console.WriteLine(p2.IsCached);
             Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine();
-           // Console.WriteLine(driver.GetImplicitWait());
+            // Console.WriteLine(driver.GetImplicitWait());
             {
                 {
                     var sw = Stopwatch.StartNew();
@@ -148,7 +119,7 @@ namespace ConsoleApp1
                         var issist = driver.Get("sadlkjaslkjd").WaitUntil(Condition.Exist, 10);
                         var is1ist = driver.Get("sadlkjaslkjd").WaitUntil(zl => zl.Text == "test", 10);
 
-                       
+
                         var isesist = driver.Get("sadlkjaslkjd").TryWait(ee => ee.Exist);
                         sw.Stop();
                         Console.WriteLine("lvl 2 :" + sw.ElapsedMilliseconds);
@@ -178,7 +149,7 @@ namespace ConsoleApp1
             {
 
             }
-     
+
             ListWebElement l = new ListWebElement(By.XPath("wqe"), _driver);
 
 

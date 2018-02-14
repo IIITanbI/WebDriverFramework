@@ -3,7 +3,6 @@
     using Extension;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Support.Extensions;
-    using OpenQA.Selenium.Support.PageObjects;
     using Proxy;
     using System;
     using System.Collections.Generic;
@@ -13,44 +12,40 @@
     public class WebElement
     {
         private WebElementProxy _webElementProxy;
-        private double _elementSearchTimeout;
 
-        public WebElement(IWebElement implicitElement, IWebDriver driver) : this(implicitElement, null, driver)
+        public WebElement(IWebElement implicitElement, IWebDriver driver)
+            : this(new WebElementProxy(implicitElement), driver)
         {
         }
-        internal WebElement(IWebElement implicitElement, WebElement parent, IWebDriver driver) : this(driver)
+        public WebElement(IWebElement implicitElement, WebElement parent)
+            : this(new WebElementProxy(implicitElement), parent)
         {
-            this._webElementProxy = new WebElementProxy(implicitElement);
+        }
+
+        public WebElement(By locator, IWebDriver driver) 
+            : this(new WebElementProxy(driver, locator), driver)
+        {
+        }
+        public WebElement(By locator, WebElement parent) 
+            : this(new WebElementProxy(parent.WrappedElement, locator), parent)
+        {
+        }
+
+        public WebElement(WebElementProxy webElementProxy, WebElement parent) : this(webElementProxy, parent.WrappedDriver)
+        {
             this.Parent = parent;
         }
-
-        public WebElement(By locator, IWebDriver driver) : this(locator, null, driver)
-        {
-        }
-        public WebElement(By locator, WebElement parent, IWebDriver driver) : this(driver)
-        {
-            ISearchContext searchContext = parent?.WrappedElement ?? driver as ISearchContext;
-            this._webElementProxy = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(searchContext),
-                new[] { locator }, false);
-            this.Parent = parent;
-        }
-
-        public WebElement(WebElementProxy webElementProxy, IWebDriver driver) : this(driver)
+        public WebElement(WebElementProxy webElementProxy, IWebDriver driver) 
         {
             this._webElementProxy = webElementProxy;
-        }
-        private WebElement(IWebDriver driver)
-        {
             this.WrappedDriver = driver;
         }
+       
 
-        public static double WaitTimeout { get; set; } = 60;
+        public static double DefaultWaitTimeout { get; set; } = 60;
 
         public IWebDriver WrappedDriver { get; }
-        public IWebElement WrappedElement => this._webElementProxy.IsImplicitSet ?
-                                                this._webElementProxy.WrappedElement
-                                                : (IWebElement)this._webElementProxy.GetTransparentProxy();
-
+        public IWebElement WrappedElement => (IWebElement)this._webElementProxy.GetTransparentProxy();
         public IWebElement Element => this.WrappedElement.Unwrap();
 
         public List<By> Locators => this._webElementProxy.Bys.ToList();
@@ -58,14 +53,13 @@
         public WebElement Parent { get; }
 
         public bool IsCached => this._webElementProxy.IsCached;
-
         public bool Exist
         {
             get
             {
                 try
                 {
-                    CheckStaleness();
+                    StubActionOnElement();
                     return true;
                 }
                 catch (NoSuchElementException)
@@ -79,11 +73,6 @@
             }
         }
 
-        public WebElement CheckStaleness()
-        {
-            StubActionOnElement();
-            return this;
-        }
         public WebElement StubActionOnElement()
         {
             //call any property on element
@@ -97,16 +86,17 @@
         }
         public WebElement Get(By locator)
         {
-            return new WebElement(locator, this, this.WrappedDriver);
-        }
-        public ListWebElement GetAll(By locator)
-        {
-            return new ListWebElement(locator, this, this.WrappedDriver);
+            return new WebElement(locator, this);
         }
         public ListWebElement GetAll(string xpath)
         {
             return GetAll(By.XPath(xpath));
         }
+        public ListWebElement GetAll(By locator)
+        {
+            return new ListWebElement(locator, this);
+        }
+
         public WebElement Locate()
         {
             return new WebElement(this.Element, this.WrappedDriver);
@@ -124,8 +114,7 @@
         public void JSScrollTo()
         {
             var elem = this.Element;
-            this.WrappedDriver.ExecuteJavaScript($"window.scrollTo({elem.Location.X}, {elem.Location.Y})",
-                this.Element);
+            this.WrappedDriver.ExecuteJavaScript($"window.scrollTo({elem.Location.X}, {elem.Location.Y})", elem);
         }
         #endregion
 
@@ -175,7 +164,8 @@
         #region Wait
         public T Wait<T>(Func<WebElement, T> condition, double timeout = -1, params Type[] exceptionTypes)
         {
-            timeout = ResolveTime(timeout, WaitTimeout);
+            //this.WrappedDriver.Manage().Timeouts().ImplicitWait = TimeSpan.Zero;
+            timeout = timeout < 0 ? DefaultWaitTimeout : timeout;
             return this.WrappedDriver.Wait(d => condition(this), timeout, exceptionTypes);
         }
         public bool TryWait(Func<WebElement, bool> condition, double timeout = -1, params Type[] exceptionTypes)
@@ -184,7 +174,7 @@
             {
                 return this.Wait(condition, timeout, exceptionTypes);
             }
-            catch (WebDriverTimeoutException)
+            catch
             {
                 return false;
             }
@@ -204,7 +194,5 @@
             return this.TryWait(e => !condition(e), timeout, exceptionTypes);
         }
         #endregion
-
-        private static double ResolveTime(double time, double currentValue) => time < 0 ? currentValue : time;
     }
 }

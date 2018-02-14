@@ -26,17 +26,22 @@
             : base(typeToBeProxied, locator, bys, shouldCached)
         {
         }
+        public WebElementListProxy(List<IWebElement> elements)
+            : base(typeof(IList<IWebElement>), null, null, false)
+        {
+            this.cachedElements = elements;
+        }
 
         /// <summary>
         /// Gets the list of IWebElement objects this proxy represents, returning a cached one if requested.
         /// </summary>
-        private List<IWebElement> Elements
+        public List<IWebElement> Elements
         {
             get
             {
                 if (this.cachedElements != null)
                 {
-                    return this.cachedElements;
+                    return this.cachedElements.ToList();
                 }
 
                 var elements = this.Locator.LocateElements(this.Bys).ToList();

@@ -9,24 +9,27 @@
 
     public class ListWebElement : IReadOnlyList<WebElement>
     {
-        private IList<IWebElement> _proxiedElements;
+        private WebElementListProxy _webElementsProxy;
 
         public ListWebElement(By locator, IWebDriver driver) : this(locator, null, driver)
         {
         }
-        public ListWebElement(By locator, WebElement parent, IWebDriver driver)
+        public ListWebElement(By locator, WebElement parent) : this(locator, parent, parent.WrappedDriver)
+        {
+        }
+        private ListWebElement(By locator, WebElement parent, IWebDriver driver)
         {
             this.Locator = locator;
             this.Parent = parent;
             this.WrappedDriver = driver;
-            this._proxiedElements = GetProxy(locator, (ISearchContext)parent?.WrappedElement ?? driver, false);
+            this._webElementsProxy = new WebElementListProxy(typeof(IList<IWebElement>), new DefaultElementLocator(parent?.WrappedElement ?? (ISearchContext)driver), new[] { locator }, false);
         }
-        private ListWebElement(IList<IWebElement> proxiedElements)
+        private ListWebElement(List<IWebElement> elements)
         {
-            this._proxiedElements = proxiedElements;
+            this._webElementsProxy = new WebElementListProxy(elements);
         }
 
-        public List<WebElement> Elements => this._proxiedElements.Select(CreateElement).ToList();
+        public List<WebElement> Elements => this._webElementsProxy.Elements.Select(CreateElement).ToList();
         public int Count => this.Elements.Count;
         public WebElement this[int index] => this.Elements[index];
 
@@ -49,7 +52,7 @@
         }
         public ListWebElement CheckStaleness()
         {
-            this.Elements.ForEach(e => e.CheckStaleness());
+            this.Elements.ForEach(e => e.StubActionOnElement());
             return this;
         }
 
@@ -65,10 +68,6 @@
         private WebElement CreateElement(IWebElement element)
         {
             return new WebElement(element, this.WrappedDriver);
-        }
-        private static IList<IWebElement> GetProxy(By locator, ISearchContext context, bool cache)
-        {
-            return (IList<IWebElement>)new WebElementListProxy(typeof(IList<IWebElement>), new DefaultElementLocator(context), new[] { locator }, cache).GetTransparentProxy();
         }
     }
 }

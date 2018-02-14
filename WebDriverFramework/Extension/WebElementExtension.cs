@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using OpenQA.Selenium.Support.Extensions;
+using WebDriverFramework.Proxy;
 
 namespace WebDriverFramework.Extension
 {
@@ -138,50 +140,46 @@ namespace WebDriverFramework.Extension
             element.SendChars(text);
         }
 
-        /// <summary>
-        /// The get parent.
-        /// </summary>
-        /// <param name="element">
-        /// The element.
-        /// </param>
-        /// <returns>
-        /// The <see cref="IWebElement"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// throw if element is null
-        /// </exception>
         public static IWebElement GetParent(this IWebElement element)
         {
             return element.FindElement(By.XPath("./.."));
         }
 
-        #region Waiting
-        #endregion
-
-        public static bool IsElementCached(this IWebElement element)
+        public static bool IsCached(this IWebElement element)
         {
             switch (element)
             {
-                case WebElement we:
-                    return we.IsCached;
                 case RemoteWebElement _:
                     return true;
+                case IProxiable proxy:
+                    return proxy.IsCached;
                 default:
-                    //element can be proxy with cache = true/false
-                    //assume that cache is false;
                     return false;
             }
         }
 
         public static IWebElement Unwrap(this IWebElement element)
         {
-            var e = element;
-            while (e is IWrapsElement)
+            IWebElement e = element;
+            while (e is IWrapsElement wrap)
             {
-                e = (e as IWrapsElement).WrappedElement;
+                e = wrap.WrappedElement;
             }
 
+            //return Unwrap(element as IWrapsElement);
             return e;
+        }
+        public static IWebElement Unwrap(this IWrapsElement wrapsElement)
+        {
+            IWebElement result = null;
+            IWrapsElement e = wrapsElement;
+            while (e != null)
+            {
+                result = e.WrappedElement;
+                e = result as IWrapsElement;
+            }
+
+            return result;
         }
 
         //public static void ExecuteJavaScript(this IWebElement element, string script, params object[] args)

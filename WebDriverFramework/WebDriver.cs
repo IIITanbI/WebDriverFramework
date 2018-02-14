@@ -21,13 +21,13 @@
         {
             return new WebElement(locator, this.WrappedDriver);
         }
-        public ListWebElement GetAll(By locator)
-        {
-            return new ListWebElement(locator, this.WrappedDriver);
-        }
         public ListWebElement GetAll(string xpath)
         {
             return GetAll(By.XPath(xpath));
+        }
+        public ListWebElement GetAll(By locator)
+        {
+            return new ListWebElement(locator, this.WrappedDriver);
         }
 
         public WebElement WaitForPresent(By locator, double timeout = -1)
