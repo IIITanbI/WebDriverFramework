@@ -37,19 +37,15 @@
 
         private object DecorateObject(MemberInfo member, IElementLocator locator)
         {
-            FieldInfo field = member as FieldInfo;
-            PropertyInfo property = member as PropertyInfo;
-
-            if (field == null && (property == null || !property.CanWrite))
+            if (!(member is FieldInfo) && (member as PropertyInfo)?.CanWrite != true)
             {
                 return null;
             }
 
-            Type targetType = GetTargetType(member);
-
-            IList<By> bys = CreateLocatorList(member);
+            var bys = CreateLocatorList(member);
             if (bys.Any())
             {
+                Type targetType = GetTargetType(member);
                 bool cache = DefaultPageObjectMemberDecoratorProxy.ShouldCacheLookup(member);
                 object result;
 
@@ -61,13 +57,6 @@
                 else if (typeof(IWebElement).IsAssignableFrom(targetType))
                 {
                     result = new WebElementProxy(typeof(IWebElement), locator, bys, cache).GetTransparentProxy();
-                }
-                else if (typeof(IList<WebElement>).IsAssignableFrom(targetType))
-                {
-                    throw new NotImplementedException();
-                    //var proxyElements = new ProxyListElement(locator, bys, cache);
-                    //var args = new object[] { proxyElements, this._driver };
-                    //result = Activator.CreateInstance(targetType, args);
                 }
                 else if (targetType == typeof(ListWebElement))
                 {
@@ -95,7 +84,7 @@
         /// <param name="member">The <see cref="MemberInfo"/> containing information about
         /// the member of the Page Object class.</param>
         /// <returns>A list of <see cref="By"/> locators based on the attributes of this member.</returns>
-        private static ReadOnlyCollection<By> CreateLocatorList(MemberInfo member)
+        private static List<By> CreateLocatorList(MemberInfo member)
         {
             List<By> bys = DefaultPageObjectMemberDecoratorProxy.CreateLocatorList(member).ToList();
 
@@ -118,11 +107,12 @@
                 }
             }
 
-            return bys.AsReadOnly();
+            return bys;
         }
 
         public void FinishDecorate(object page)
         {
+            var memberRelations = new Dictionary<MemberInfo, MemberInfo>();
             foreach (var member in _membersDictionary.Keys)
             {
                 if (!(member.GetCustomAttribute(typeof(RelateToAttribute)) is RelateToAttribute att))
@@ -137,7 +127,17 @@
                     throw new Exception($"There is no field with name '{name}' or their number more than 1");
                 }
 
-                var parent = _membersDictionary[matchList.First()];
+                memberRelations.Add(member, matchList.First());
+            }
+
+            var graph = new Graph<MemberInfo>(memberRelations, memberRelations.Keys.ToList());
+            var queue = graph.BuildQueue();
+
+            foreach (var member in queue)
+            {
+                var parentMember = memberRelations[member];
+                var current = _membersDictionary[member];
+                var parent = _membersDictionary[parentMember];
 
                 ISearchContext context;
                 switch (parent)
@@ -149,10 +149,42 @@
                         context = iw;
                         break;
                     default:
-                        throw new NotImplementedException();
+                        throw new NotImplementedException($"Type '{GetTargetType(parentMember)}' is not supported as parent");
                 }
 
-                var decoratedValue = DecorateObject(member, new DefaultElementLocator(context));
+                switch (current)
+                {
+                    case ListWebElement _:
+                    case IWebElement __:
+                    case WebElement ___:
+                        break;
+                    default:
+                        throw new NotImplementedException($"Type '{GetTargetType(member)}' is not supported as child for '{GetTargetType(parentMember)}'");
+                }
+
+                object decoratedValue;
+
+                switch (current)
+                {
+                    case ListWebElement lwe when parent is WebElement we:
+                        {
+                            var proxy = new WebElementListProxy(typeof(IList<IWebElement>), new DefaultElementLocator(context),
+                                lwe.Locators, DefaultPageObjectMemberDecoratorProxy.ShouldCacheLookup(member));
+                            decoratedValue = new ListWebElement(proxy, we);
+                            break;
+                        }
+                    case WebElement wc when parent is WebElement wp:
+                        {
+                            var proxy = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(context),
+                                wc.Locators, DefaultPageObjectMemberDecoratorProxy.ShouldCacheLookup(member));
+                            decoratedValue = new WebElement(proxy, wp);
+                            break;
+                        }
+                    default:
+                        decoratedValue = DecorateObject(member, new DefaultElementLocator(context));
+                        break;
+                }
+
                 if (member is FieldInfo field)
                 {
                     field.SetValue(page, decoratedValue);
@@ -176,6 +208,45 @@
             public new static ReadOnlyCollection<By> CreateLocatorList(MemberInfo member) => DefaultPageObjectMemberDecorator.CreateLocatorList(member);
 
             public new static bool ShouldCacheLookup(MemberInfo member) => DefaultPageObjectMemberDecorator.ShouldCacheLookup(member);
+        }
+    }
+
+    public class Graph<T>
+    {
+        //dictonary - member and his parent 
+        private Dictionary<T, T> relationDictionary;
+        private List<T> allMembers;
+        private HashSet<T> used = new HashSet<T>();
+
+        public Graph(Dictionary<T, T> relationDictionary, List<T> allMembers)
+        {
+            this.relationDictionary = relationDictionary;
+            this.allMembers = allMembers;
+        }
+
+        public List<T> BuildQueue()
+        {
+            var result = allMembers.SelectMany(Dfs).ToList();
+            return result;
+        }
+
+        private List<T> Dfs(T member)
+        {
+            var currentChain = new List<T>();
+            while (true)
+            {
+                //if it was already used or doesn't have a parent
+                if (!used.Add(member) || !relationDictionary.ContainsKey(member))
+                {
+                    break;
+                }
+
+                currentChain.Add(member);
+                member = relationDictionary[member];
+            }
+
+            currentChain.Reverse();
+            return currentChain;
         }
     }
 }

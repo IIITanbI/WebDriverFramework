@@ -1,4 +1,6 @@
-﻿namespace WebDriverFramework
+﻿using OpenQA.Selenium.Support.PageObjects;
+
+namespace WebDriverFramework
 {
     using Extension;
     using OpenQA.Selenium;
@@ -47,8 +49,8 @@
         public IWebElement WrappedElement => (IWebElement)this._webElementProxy.GetTransparentProxy();
         public IWebElement Element => this.WrappedElement.Unwrap();
 
-        public List<By> Locators => this._webElementProxy.Bys.ToList();
-        public By Locator => Locators.First();
+        public List<By> Locators => this._webElementProxy.Bys?.ToList();
+        public By Locator => Locators.FirstOrDefault();
         public WebElement Parent { get; }
 
         public bool IsCached => this._webElementProxy.IsCached;
@@ -87,6 +89,11 @@
         {
             return new WebElement(locator, this);
         }
+
+        public ListWebElement GetAll()
+        {
+            return this.Parent != null ? new ListWebElement(this.Locator, this.Parent) : new ListWebElement(this.Locator, this.WrappedDriver);
+        }
         public ListWebElement GetAll(string xpath)
         {
             return GetAll(By.XPath(xpath));
@@ -94,6 +101,10 @@
         public ListWebElement GetAll(By locator)
         {
             return new ListWebElement(locator, this);
+        }
+        public ListWebElement GetAllChildren()
+        {
+            return GetAll(By.XPath(".//*"));
         }
 
         public WebElement Locate()
@@ -193,5 +204,11 @@
             return this.TryWait(e => !condition(e), timeout, exceptionTypes);
         }
         #endregion
+
+        private IElementLocator GetElementLocator()
+        {
+            var context = this.Parent?.WrappedElement ?? (ISearchContext)this.WrappedDriver;
+            return new DefaultElementLocator(context);
+        }
     }
 }

@@ -29,16 +29,15 @@ namespace ConsoleApp1
 {
     class Program
     {
-        [FindsBy(How = How.XPath, Using = "//div[@class='test']")]
-        [ByXPath("//div[@class='test']")]
+        [ByXPath("//div[@class='test2']")]
         public IWebElement Test = null;
 
         [CacheLookup]
         [ByXPath("//div[@class='test']")]
         private WebElement element1 = null;
 
-        [RelateTo(nameof(element1))]
-        [ByXPath("./div[@class='test1']/label")]
+        [RelateTo(nameof(Test))]
+        [ByXPath("./label")]
         private WebElement element2 = null;
 
         [ByXPath("//input")]
@@ -69,6 +68,22 @@ namespace ConsoleApp1
         }
         static void Main(string[] args)
         {
+            Dictionary<int, int> dict = new Dictionary<int, int>()
+            {
+                {1, 2},
+                {2, 3},
+                {4, 2},
+                {6, 5},
+                {8, 3},
+                {3, 5},
+                {9, 3},
+                {18, 4},
+                {19, 4},
+            };
+
+            var all = dict.Keys.Concat(dict.Values).Distinct().ToList();
+            var graph = new Graph<int>(dict, all);
+            var rssesult = graph.BuildQueue();
             //IWebDriver _driver = new FirefoxDriver(new FirefoxOptions(){BrowserExecutableLocation = "C:\\Program Files\\Mozilla Firefox\\firefox.exe" });
             //IWebDriver _driver = new InternetExplorerDriver(new InternetExplorerOptions()
             //{
@@ -87,10 +102,10 @@ namespace ConsoleApp1
             // driver.Navigate().GoToUrl("https://onliner.by");
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
             var pr = new Program(driver);
-            var p1 = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(driver), new[] {By.XPath(".//*")}, true);
+            var p1 = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(driver), new[] { By.XPath(".//*") }, true);
             //Console.WriteLine(p1.WrappedElement.TagName);
             var p2 = new WebElementProxy((IWebElement)p1.GetTransparentProxy());
-
+            Console.WriteLine(pr.element2.Text);
             Console.WriteLine(p2.IsCached);
             Console.WriteLine();
             // Console.WriteLine(driver.GetImplicitWait());
