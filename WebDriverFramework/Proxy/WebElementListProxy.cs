@@ -13,21 +13,20 @@
     public class WebElementListProxy : DriverObjectProxy
     {
         private List<IWebElement> cachedElements;
+        public ListWebElement Source;
 
-        public WebElementListProxy(ISearchContext searchContext, By by, bool shouldCached = false)
-            : this(typeof(IList<IWebElement>), new DefaultElementLocator(searchContext), new[] { by }, shouldCached)
+        public WebElementListProxy(List<IWebElement> elements) : this(null, null, false)
         {
+            this.cachedElements = elements;
         }
-
+        public WebElementListProxy(By by, ListWebElement source, bool shouldCached = false)
+            : this(typeof(IList<IWebElement>), null, new[] { by }, shouldCached)
+        {
+            this.Source = source;
+        }
         public WebElementListProxy(Type typeToBeProxied, IElementLocator locator, IEnumerable<By> bys, bool shouldCached)
             : base(typeToBeProxied, locator, bys, shouldCached)
         {
-        }
-
-        public WebElementListProxy(List<IWebElement> elements)
-            : this(typeof(IList<IWebElement>), null, null, false)
-        {
-            this.cachedElements = elements;
         }
 
         /// <summary>
@@ -42,7 +41,17 @@
                     return this.cachedElements.ToList();
                 }
 
-                var elements = this.Locator.LocateElements(this.Bys).ToList();
+                List<IWebElement> elements;
+                if (this.Source != null)
+                {
+                    var context = this.Source.Parent?.Element ?? (ISearchContext)this.Source.WrappedDriver;
+                    elements = new DefaultElementLocator(context).LocateElements(this.Bys).ToList();
+                }
+                else
+                {
+                    elements = this.Locator.LocateElements(this.Bys).ToList();
+                }
+
                 if (this.ShouldCached)
                 {
                     this.cachedElements = elements;

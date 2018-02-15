@@ -16,6 +16,7 @@ namespace WebDriverFramework
         public static double DefaultWaitTimeout { get; set; } = 60;
 
         private WebElementProxy _webElementProxy;
+     
 
         public WebElement(IWebElement implicitElement, IWebDriver driver) : this(new WebElementProxy(implicitElement), driver)
         {
@@ -24,11 +25,13 @@ namespace WebDriverFramework
         {
         }
 
-        public WebElement(By locator, IWebDriver driver) : this(new WebElementProxy(driver, locator), driver)
+        public WebElement(By locator, IWebDriver driver) : this(null, null, driver)
         {
+            this.WebElementProxy = new WebElementProxy(locator, this);
         }
-        public WebElement(By locator, WebElement parent) : this(new WebElementProxy(parent.WrappedElement, locator), parent)
+        public WebElement(By locator, WebElement parent) : this(null, parent, parent.WrappedDriver)
         {
+            this.WebElementProxy = new WebElementProxy(locator, this);
         }
 
         public WebElement(WebElementProxy webElementProxy, IWebDriver driver) : this(webElementProxy, null, driver)
@@ -40,20 +43,31 @@ namespace WebDriverFramework
 
         private WebElement(WebElementProxy webElementProxy, WebElement parent, IWebDriver driver)
         {
-            this._webElementProxy = webElementProxy;
+            this.WebElementProxy = webElementProxy;
             this.Parent = parent;
             this.WrappedDriver = driver;
         }
 
+        private WebElementProxy WebElementProxy
+        {
+            get => _webElementProxy;
+            set
+            {
+                _webElementProxy = value;
+                _webElementProxy.Source = this;
+            }
+        }
+
         public IWebDriver WrappedDriver { get; }
-        public IWebElement WrappedElement => (IWebElement)this._webElementProxy.GetTransparentProxy();
+        public IWebElement WrappedElement => (IWebElement)this.WebElementProxy.GetTransparentProxy();
         public IWebElement Element => this.WrappedElement.Unwrap();
 
-        public List<By> Locators => this._webElementProxy.Bys?.ToList();
+        public List<By> Locators => this.WebElementProxy.Bys?.ToList();
         public By Locator => Locators.FirstOrDefault();
-        public WebElement Parent { get; }
 
-        public bool IsCached => this._webElementProxy.IsCached;
+        public WebElement Parent { get; set; }
+
+        public bool IsCached => this.WebElementProxy.IsCached;
         public bool Exist
         {
             get
@@ -204,11 +218,5 @@ namespace WebDriverFramework
             return this.TryWait(e => !condition(e), timeout, exceptionTypes);
         }
         #endregion
-
-        private IElementLocator GetElementLocator()
-        {
-            var context = this.Parent?.WrappedElement ?? (ISearchContext)this.WrappedDriver;
-            return new DefaultElementLocator(context);
-        }
     }
 }

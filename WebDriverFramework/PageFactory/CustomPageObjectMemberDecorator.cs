@@ -13,6 +13,7 @@
     public class CustomPageObjectMemberDecorator : ICustomPageObjectMemberDecorator
     {
         private readonly Dictionary<MemberInfo, object> _membersDictionary = new Dictionary<MemberInfo, object>();
+        private readonly Dictionary<MemberInfo, DriverObjectProxy> _proxyDictionary = new Dictionary<MemberInfo, DriverObjectProxy>();
 
         private IWebDriver _driver;
         public CustomPageObjectMemberDecorator(IWebDriver driver)
@@ -49,29 +50,33 @@
                 bool cache = DefaultPageObjectMemberDecoratorProxy.ShouldCacheLookup(member);
                 object result;
 
+                DriverObjectProxy proxyElement;
                 if (typeof(WebElement).IsAssignableFrom(targetType))
                 {
-                    var proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
-                    result = new WebElement(proxyElement, this._driver);
+                    proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
+                    result = new WebElement((WebElementProxy)proxyElement, this._driver);
                 }
                 else if (typeof(IWebElement).IsAssignableFrom(targetType))
                 {
-                    result = new WebElementProxy(typeof(IWebElement), locator, bys, cache).GetTransparentProxy();
+                    proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
+                    result = proxyElement.GetTransparentProxy();
                 }
                 else if (targetType == typeof(ListWebElement))
                 {
-                    var proxyElement = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache);
-                    result = new ListWebElement(proxyElement, this._driver);
+                    proxyElement = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache);
+                    result = new ListWebElement((WebElementListProxy)proxyElement, this._driver);
                 }
                 else if (targetType == typeof(IList<IWebElement>))
                 {
-                    result = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache).GetTransparentProxy();
+                    proxyElement = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache);
+                    result = proxyElement.GetTransparentProxy();
                 }
                 else
                 {
                     throw new Exception($"Undefined type of element: '{targetType?.FullName}'");
                 }
 
+                _proxyDictionary.Add(member, proxyElement);
                 return result;
             }
 
@@ -112,12 +117,16 @@
 
         public void FinishDecorate(object page)
         {
-            var memberRelations = new Dictionary<MemberInfo, MemberInfo>();
             foreach (var member in _membersDictionary.Keys)
             {
                 if (!(member.GetCustomAttribute(typeof(RelateToAttribute)) is RelateToAttribute att))
                 {
                     continue;
+                }
+
+                if (_membersDictionary[member] == null)
+                {
+                    throw new Exception($"member '{member}' has a RelateToAttribute but doesn't have any locators");
                 }
 
                 var name = att.FieldName;
@@ -127,15 +136,7 @@
                     throw new Exception($"There is no field with name '{name}' or their number more than 1");
                 }
 
-                memberRelations.Add(member, matchList.First());
-            }
-
-            var graph = new Graph<MemberInfo>(memberRelations, memberRelations.Keys.ToList());
-            var queue = graph.BuildQueue();
-
-            foreach (var member in queue)
-            {
-                var parentMember = memberRelations[member];
+                var parentMember = matchList.First();
                 var current = _membersDictionary[member];
                 var parent = _membersDictionary[parentMember];
 
@@ -161,37 +162,18 @@
                     default:
                         throw new NotImplementedException($"Type '{GetTargetType(member)}' is not supported as child for '{GetTargetType(parentMember)}'");
                 }
-
-                object decoratedValue;
-
+               
                 switch (current)
                 {
-                    case ListWebElement lwe when parent is WebElement we:
-                        {
-                            var proxy = new WebElementListProxy(typeof(IList<IWebElement>), new DefaultElementLocator(context),
-                                lwe.Locators, DefaultPageObjectMemberDecoratorProxy.ShouldCacheLookup(member));
-                            decoratedValue = new ListWebElement(proxy, we);
-                            break;
-                        }
-                    case WebElement wc when parent is WebElement wp:
-                        {
-                            var proxy = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(context),
-                                wc.Locators, DefaultPageObjectMemberDecoratorProxy.ShouldCacheLookup(member));
-                            decoratedValue = new WebElement(proxy, wp);
-                            break;
-                        }
-                    default:
-                        decoratedValue = DecorateObject(member, new DefaultElementLocator(context));
+                    case ListWebElement lwe when parent is WebElement pwe:
+                        lwe.Parent = pwe;
                         break;
-                }
-
-                if (member is FieldInfo field)
-                {
-                    field.SetValue(page, decoratedValue);
-                }
-                else
-                {
-                    ((PropertyInfo)member).SetValue(page, decoratedValue);
+                    case WebElement we when parent is WebElement pwe:
+                        we.Parent = pwe;
+                        break;
+                    default:
+                        this._proxyDictionary[member].Locator = new DefaultElementLocator(context);
+                        break;
                 }
             }
         }
@@ -208,45 +190,6 @@
             public new static ReadOnlyCollection<By> CreateLocatorList(MemberInfo member) => DefaultPageObjectMemberDecorator.CreateLocatorList(member);
 
             public new static bool ShouldCacheLookup(MemberInfo member) => DefaultPageObjectMemberDecorator.ShouldCacheLookup(member);
-        }
-    }
-
-    public class Graph<T>
-    {
-        //dictonary - member and his parent 
-        private Dictionary<T, T> relationDictionary;
-        private List<T> allMembers;
-        private HashSet<T> used = new HashSet<T>();
-
-        public Graph(Dictionary<T, T> relationDictionary, List<T> allMembers)
-        {
-            this.relationDictionary = relationDictionary;
-            this.allMembers = allMembers;
-        }
-
-        public List<T> BuildQueue()
-        {
-            var result = allMembers.SelectMany(Dfs).ToList();
-            return result;
-        }
-
-        private List<T> Dfs(T member)
-        {
-            var currentChain = new List<T>();
-            while (true)
-            {
-                //if it was already used or doesn't have a parent
-                if (!used.Add(member) || !relationDictionary.ContainsKey(member))
-                {
-                    break;
-                }
-
-                currentChain.Add(member);
-                member = relationDictionary[member];
-            }
-
-            currentChain.Reverse();
-            return currentChain;
         }
     }
 }

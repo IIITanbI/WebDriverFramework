@@ -1,7 +1,7 @@
 ﻿namespace WebDriverFramework.PageFactory
 {
-    using OpenQA.Selenium.Support.PageObjects;
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Support.PageObjects;
 
     public static class CustomPageFactory
     {
@@ -12,7 +12,7 @@
         /// <param name="page">The Page Object to be populated with elements.</param>
         /// <param name="decorator">The <see cref="OpenQA.Selenium.Support.PageObjects.IPageObjectMemberDecorator"/> implementation that
         /// determines how Page Object members representing elements are discovered and populated.</param>
-        /// <exception cref="ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// thrown if a field or property decorated with the <see cref="OpenQA.Selenium.Support.PageObjects.FindsByAttribute"/> is not of type
         /// <see cref="IWebElement"/> or IList{IWebElement}.
         /// </exception>
@@ -29,7 +29,7 @@
         /// determines how elements are located.</param>
         /// <param name="decorator">The <see cref="IPageObjectMemberDecorator"/> implementation that
         /// determines how Page Object members representing elements are discovered and populated.</param>
-        /// <exception cref="ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// thrown if a field or property decorated with the <see cref="OpenQA.Selenium.Support.PageObjects.FindsByAttribute"/> is not of type
         /// <see cref="IWebElement"/> or IList{IWebElement}.
         /// </exception>

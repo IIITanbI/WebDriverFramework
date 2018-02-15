@@ -1,7 +1,6 @@
 ﻿using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 
 namespace WebDriverFramework
 {

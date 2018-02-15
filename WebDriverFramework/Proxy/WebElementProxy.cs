@@ -27,20 +27,21 @@
 
         private IWebElement cachedElement;
 
-        public WebElementProxy(ISearchContext searchContext, By by, bool shouldCached = false)
-            : this(typeof(IWebElement), new DefaultElementLocator(searchContext), new[] { by }, shouldCached)
+        public WebElementProxy(IWebElement element) : this(null, null, true)
         {
+            this.cachedElement = element;
         }
-
+        public WebElementProxy(By by, WebElement source, bool shouldCached = false)
+            : this(typeof(IWebElement), null, new[] { by }, shouldCached)
+        {
+            this.Source = source;
+        }
         public WebElementProxy(Type typeToBeProxied, IElementLocator locator, IEnumerable<By> bys, bool shouldCached)
             : base(typeToBeProxied, locator, bys, shouldCached)
         {
         }
-
-        public WebElementProxy(IWebElement element) : base(typeof(IWebElement), null, null, true)
-        {
-            this.cachedElement = element;
-        }
+       
+        public WebElement Source;
 
         public bool IsCached => (cachedElement as IProxiable)?.IsCached ?? cachedElement is RemoteWebElement;
 
@@ -53,7 +54,17 @@
                     return this.cachedElement;
                 }
 
-                var e = this.Locator.LocateElement(this.Bys);
+                IWebElement e;
+                if (this.Source != null)
+                {
+                    var context = this.Source.Parent?.Element ?? (ISearchContext)this.Source.WrappedDriver;
+                    e = new DefaultElementLocator(context).LocateElement(this.Bys);
+                }
+                else
+                {
+                    e = this.Locator.LocateElement(this.Bys);
+                }
+
                 if (this.ShouldCached)
                 {
                     this.cachedElement = e;

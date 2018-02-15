@@ -33,10 +33,10 @@ namespace ConsoleApp1
         public IWebElement Test = null;
 
         [CacheLookup]
-        [ByXPath("//div[@class='test']")]
+        [ByXPath("//div[@class='test2']")]
         private WebElement element1 = null;
 
-        [RelateTo(nameof(Test))]
+        [RelateTo(nameof(element1))]
         [ByXPath("./label")]
         private WebElement element2 = null;
 
@@ -81,6 +81,10 @@ namespace ConsoleApp1
                 {19, 4},
             };
 
+            if (dict?.Any() != true)
+            {
+                
+            }
             var all = dict.Keys.Concat(dict.Values).Distinct().ToList();
             var graph = new Graph<int>(dict, all);
             var rssesult = graph.BuildQueue();
@@ -103,6 +107,10 @@ namespace ConsoleApp1
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
             var pr = new Program(driver);
             var p1 = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(driver), new[] { By.XPath(".//*") }, true);
+            var tp1 = p1.GetTransparentProxy();
+            p1.Locator = new DefaultElementLocator(driver);
+            var tp2 = p1.GetTransparentProxy();
+            Console.WriteLine(tp1 == tp2);
             //Console.WriteLine(p1.WrappedElement.TagName);
             var p2 = new WebElementProxy((IWebElement)p1.GetTransparentProxy());
             Console.WriteLine(pr.element2.Text);
@@ -176,6 +184,45 @@ namespace ConsoleApp1
             var vis3 = pr.element3.Text;
             var vis4 = pr.element4.ToList();
             driver.Quit();
+        }
+    }
+
+    public class Graph<T>
+    {
+        //dictonary - member and his parent 
+        private Dictionary<T, T> relationDictionary;
+        private List<T> allMembers;
+        private HashSet<T> used = new HashSet<T>();
+
+        public Graph(Dictionary<T, T> relationDictionary, List<T> allMembers)
+        {
+            this.relationDictionary = relationDictionary;
+            this.allMembers = allMembers;
+        }
+
+        public List<T> BuildQueue()
+        {
+            var result = allMembers.SelectMany(Dfs).ToList();
+            return result;
+        }
+
+        private List<T> Dfs(T member)
+        {
+            var currentChain = new List<T>();
+            while (true)
+            {
+                //if it was already used or doesn't have a parent
+                if (!used.Add(member) || !relationDictionary.ContainsKey(member))
+                {
+                    break;
+                }
+
+                currentChain.Add(member);
+                member = relationDictionary[member];
+            }
+
+            currentChain.Reverse();
+            return currentChain;
         }
     }
 }

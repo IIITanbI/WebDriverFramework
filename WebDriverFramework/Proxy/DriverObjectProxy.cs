@@ -31,17 +31,17 @@
         /// <summary>
         /// Gets the <see cref="IElementLocator"/> implementation that determines how elements are located.
         /// </summary>
-        public IElementLocator Locator { get; }
+        public IElementLocator Locator { get; set; }
 
         /// <summary>
         /// Gets the list of methods by which to search for the elements.
         /// </summary>
-        public IEnumerable<By> Bys { get; }
+        public IEnumerable<By> Bys { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether element search results should be cached.
         /// </summary>
-        public bool ShouldCached { get; }
+        public bool ShouldCached { get; set; }
 
         /// <summary>
         /// Invokes a method on the object this proxy represents.

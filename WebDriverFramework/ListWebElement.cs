@@ -45,7 +45,7 @@
         public IWebDriver WrappedDriver { get; }
         public List<By> Locators => this._webElementsProxy.Bys.ToList();
         public By Locator => Locators.First();
-        public WebElement Parent { get; }
+        public WebElement Parent { get; set; }
 
         public List<WebElement> Get(By locator)
         {
