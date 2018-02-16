@@ -1,6 +1,4 @@
-﻿using OpenQA.Selenium.Support.PageObjects;
-
-namespace WebDriverFramework
+﻿namespace WebDriverFramework
 {
     using Extension;
     using OpenQA.Selenium;
@@ -17,7 +15,6 @@ namespace WebDriverFramework
 
         private WebElementProxy _webElementProxy;
      
-
         public WebElement(IWebElement implicitElement, IWebDriver driver) : this(new WebElementProxy(implicitElement), driver)
         {
         }

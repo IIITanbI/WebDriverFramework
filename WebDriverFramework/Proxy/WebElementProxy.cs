@@ -54,23 +54,23 @@
                     return this.cachedElement;
                 }
 
-                IWebElement e;
+                IWebElement element;
                 if (this.Source != null)
                 {
                     var context = this.Source.Parent?.Element ?? (ISearchContext)this.Source.WrappedDriver;
-                    e = new DefaultElementLocator(context).LocateElement(this.Bys);
+                    element = new DefaultElementLocator(context).LocateElement(this.Bys);
                 }
                 else
                 {
-                    e = this.Locator.LocateElement(this.Bys);
+                    element = this.Locator.LocateElement(this.Bys);
                 }
 
                 if (this.ShouldCached)
                 {
-                    this.cachedElement = e;
+                    this.cachedElement = element;
                 }
 
-                return e;
+                return element;
             }
         }
 
