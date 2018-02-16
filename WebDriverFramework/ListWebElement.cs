@@ -9,6 +9,15 @@
     public class ListWebElement : IReadOnlyList<WebElement>
     {
         private WebElementListProxy _webElementsProxy;
+        private WebElementListProxy WebElementsProxy
+        {
+            get => _webElementsProxy;
+            set
+            {
+                this._webElementsProxy = value;
+                this._webElementsProxy.Source = this;
+            }
+        }
 
         public ListWebElement(List<IWebElement> elements, IWebDriver driver) : this(new WebElementListProxy(elements), driver)
         {
@@ -17,11 +26,13 @@
         {
         }
 
-        public ListWebElement(By locator, IWebDriver driver) : this(new WebElementListProxy(driver, locator), driver)
+        public ListWebElement(By locator, IWebDriver driver) : this(null, null, driver)
         {
+            this.WebElementsProxy = new WebElementListProxy(locator, this);
         }
-        public ListWebElement(By locator, WebElement parent) : this(new WebElementListProxy(parent.WrappedElement, locator), parent)
+        public ListWebElement(By locator, WebElement parent) : this(null, parent, parent.WrappedDriver)
         {
+            this.WebElementsProxy = new WebElementListProxy(locator, this);
         }
 
         public ListWebElement(WebElementListProxy webElementsProxy, IWebDriver driver) : this(webElementsProxy, null, driver)
@@ -33,17 +44,17 @@
 
         private ListWebElement(WebElementListProxy webElementsProxy, WebElement parent, IWebDriver driver)
         {
-            this._webElementsProxy = webElementsProxy;
+            this.WebElementsProxy = webElementsProxy;
             this.Parent = parent;
             this.WrappedDriver = driver;
         }
 
-        public List<WebElement> Elements => this._webElementsProxy.Elements.Select(CreateElement).ToList();
+        public List<WebElement> Elements => this.WebElementsProxy.Elements.Select(CreateElement).ToList();
         public int Count => this.Elements.Count;
         public WebElement this[int index] => this.Elements[index];
 
         public IWebDriver WrappedDriver { get; }
-        public List<By> Locators => this._webElementsProxy.Bys.ToList();
+        public List<By> Locators => this.WebElementsProxy.Bys.ToList();
         public By Locator => Locators.First();
         public WebElement Parent { get; set; }
 
