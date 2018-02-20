@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using OpenQA.Selenium.Support.Extensions;
 using WebDriverFramework.Proxy;
 
 namespace WebDriverFramework.Extension
@@ -15,29 +14,15 @@ namespace WebDriverFramework.Extension
     /// <summary>
     /// <see cref="IWebElement"/> extension
     /// </summary>
-    public static class WebElementExtension
+    public static partial class WebElementExtension
     {
         /// <summary>
         /// Object for locking while using Clipboard.
         /// </summary>
         private static readonly object Lock = new object();
 
-        /// <summary>
-        /// The copy paste into element.
-        /// </summary>
-        /// <param name="element">
-        /// The element.
-        /// </param>
-        /// <param name="text">
-        /// The text.
-        /// </param>
         public static void CopyPaste(this IWebElement element, string text)
         {
-            if (element == null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
             lock (Lock)
             {
                 var thread = new Thread(
@@ -54,35 +39,13 @@ namespace WebDriverFramework.Extension
                 thread.Join();
             }
         }
-
-        /// <summary>
-        ///  Clear and Type text by chars
-        /// </summary>
-        /// <param name="element"><see cref="IWebElement"/> web control</param>
-        /// <param name="text">new text</param>
-        public static void SendChars(this IWebElement element, string text)
+        public static void SendByChars(this IWebElement element, string text)
         {
-            if (element == null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             foreach (var ch in text)
             {
                 element.SendKeys(ch.ToString());
             }
         }
-
-        /// <summary>
-        ///  Clear and Type text
-        /// </summary>
-        /// <param name="element"><see cref="IWebElement"/> web control</param>
-        /// <param name="text">new text</param>
         public static void ClearAndSetText(this IWebElement element, string text)
         {
             if (element == null)
@@ -93,12 +56,6 @@ namespace WebDriverFramework.Extension
             element.Clear();
             element.SendKeys(text);
         }
-
-        /// <summary>
-        ///  Clear and Type text by chars
-        /// </summary>
-        /// <param name="element"><see cref="IWebElement"/> web control</param>
-        /// <param name="text">new text</param>
         public static void ClearAndSetTextByChars(this IWebElement element, string text)
         {
             if (element == null)
@@ -112,18 +69,8 @@ namespace WebDriverFramework.Extension
             }
 
             element.Clear();
-            element.SendChars(text);
+            element.SendByChars(text);
         }
-
-        /// <summary>
-        /// Select text and set text by chars
-        /// </summary>
-        /// <param name="element">
-        /// The element.
-        /// </param>
-        /// <param name="text">
-        /// text that should be typed
-        /// </param>
         public static void SelectAndSetTextByChars(this IWebElement element, string text)
         {
             if (element == null)
@@ -137,38 +84,40 @@ namespace WebDriverFramework.Extension
             }
 
             element.SendKeys(Keys.LeftControl + "a");
-            element.SendChars(text);
+            element.SendByChars(text);
         }
 
-        public static IWebElement GetParent(this IWebElement element)
+        public static bool Exist(this IWebElement element)
         {
-            return element.FindElement(By.XPath("./.."));
-        }
-
-        public static bool IsCached(this IWebElement element)
-        {
-            switch (element)
+            try
             {
-                case RemoteWebElement _:
-                    return true;
-                case IProxiable proxy:
-                    return proxy.IsCached;
-                default:
-                    return false;
+                element.StubActionOnElement();
+                return true;
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
+            catch (StaleElementReferenceException)
+            {
+                return false;
             }
         }
 
-        public static IWebElement Unwrap(this IWebElement element)
-        {
-            IWebElement e = element;
-            while (e is IWrapsElement wrap)
-            {
-                e = wrap.WrappedElement;
-            }
+        //public static bool IsCached(this IWebElement element)
+        //{
+        //    switch (element)
+        //    {
+        //        case RemoteWebElement _:
+        //            return true;
+        //        case IProxiable proxy:
+        //            return proxy.IsCached;
+        //        default:
+        //            return false;
+        //    }
+        //}
 
-            //return Unwrap(element as IWrapsElement);
-            return e;
-        }
+        public static IWebElement Unwrap(this IWebElement element) => Unwrap(element as IWrapsElement);
         public static IWebElement Unwrap(this IWrapsElement wrapsElement)
         {
             IWebElement result = null;
@@ -182,27 +131,32 @@ namespace WebDriverFramework.Extension
             return result;
         }
 
-        //public static void ExecuteJavaScript(this IWebElement element, string script, params object[] args)
-        //{
-        //    element.GetDriver().ExecuteJavaScript(script, args);
-        //}
-        //public static T ExecuteJavaScript<T>(this IWebElement element, string script, params object[] args)
-        //{
-        //    return element.GetDriver().ExecuteJavaScript<T>(script, args);
-        //}
-
         public static IWebDriver GetDriver(this IWebElement element)
         {
-            return (element.Unwrap() as IWrapsDriver)?.WrappedDriver ?? throw new NotImplementedException();
+            return element.Unwrap() is IWrapsDriver wrap ? wrap.WrappedDriver : throw new NotImplementedException();
         }
 
-        public static IWebElement FindElement(this IWebElement element, string xpath)
+        public static T StubActionOnElement<T>(this T element) where T : IWebElement
         {
-            return element.FindElement(By.XPath(xpath));
+            var tagName = element.TagName;
+            return element;
         }
-        public static ReadOnlyCollection<IWebElement> FindElements(this IWebElement element, string xpath)
+
+        public static T GetTParent<T>(this ISearchContext<T> element)
         {
-            return element.FindElements(By.XPath(xpath));
+            return element.FindElement(By.XPath("./.."));
+        }
+        public static IWebElement GetParent(this ISearchContext element)
+        {
+            return element.FindElement(By.XPath("./.."));
+        }
+        public static IWebElement FindElement(this ISearchContext context, string xpath)
+        {
+            return context.FindElement(By.XPath(xpath));
+        }
+        public static ReadOnlyCollection<IWebElement> FindElements(this ISearchContext context, string xpath)
+        {
+            return context.FindElements(By.XPath(xpath));
         }
     }
 }

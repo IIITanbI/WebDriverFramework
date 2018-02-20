@@ -15,12 +15,6 @@
         private readonly Dictionary<MemberInfo, object> _membersDictionary = new Dictionary<MemberInfo, object>();
         private readonly Dictionary<MemberInfo, DriverObjectProxy> _proxyDictionary = new Dictionary<MemberInfo, DriverObjectProxy>();
 
-        private IWebDriver _driver;
-        public CustomPageObjectMemberDecorator(IWebDriver driver)
-        {
-            this._driver = driver;
-        }
-
         /// <summary>
         /// Locates an element or list of elements for a Page Object member, and returns a
         /// proxy object for the element or list of elements.
@@ -32,7 +26,6 @@
         public object Decorate(MemberInfo member, IElementLocator locator)
         {
             object proxyObject = DecorateObject(member, locator);
-            _membersDictionary.Add(member, proxyObject);
             return proxyObject;
         }
 
@@ -44,43 +37,45 @@
             }
 
             var bys = CreateLocatorList(member);
-            if (bys.Any())
+            if (!bys.Any())
             {
-                Type targetType = GetTargetType(member);
-                bool cache = DefaultPageObjectMemberDecoratorProxy.ShouldCacheLookup(member);
-                object result;
-
-                DriverObjectProxy proxyElement;
-                if (typeof(WebElement).IsAssignableFrom(targetType))
-                {
-                    proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
-                    result = new WebElement((WebElementProxy)proxyElement, this._driver);
-                }
-                else if (typeof(IWebElement).IsAssignableFrom(targetType))
-                {
-                    proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
-                    result = proxyElement.GetTransparentProxy();
-                }
-                else if (targetType == typeof(ListWebElement))
-                {
-                    proxyElement = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache);
-                    result = new ListWebElement((WebElementListProxy)proxyElement, this._driver);
-                }
-                else if (targetType == typeof(IList<IWebElement>))
-                {
-                    proxyElement = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache);
-                    result = proxyElement.GetTransparentProxy();
-                }
-                else
-                {
-                    throw new Exception($"Undefined type of element: '{targetType?.FullName}'");
-                }
-
-                _proxyDictionary.Add(member, proxyElement);
-                return result;
+                return null;
             }
 
-            return null;
+            var driver = (IWebDriver)locator.SearchContext;
+            Type targetType = GetTargetType(member);
+            bool cache = DefaultPageObjectMemberDecoratorProxy.ShouldCacheLookup(member);
+            object result;
+
+            DriverObjectProxy proxyElement = null;
+            if (typeof(WebElement).IsAssignableFrom(targetType))
+            {
+                result = new WebElement(bys, driver) { ShouldCached = cache };
+            }
+            else if (typeof(IWebElement).IsAssignableFrom(targetType))
+            {
+                proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
+                result = proxyElement.GetTransparentProxy();
+            }
+            else if (targetType == typeof(ListWebElement))
+            {
+                result = new ListWebElement(bys, driver);
+            }
+            else if (targetType == typeof(IList<IWebElement>))
+            {
+                proxyElement = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache);
+                result = proxyElement.GetTransparentProxy();
+            }
+            else
+            {
+                throw new Exception($"Undefined type of element: '{targetType?.FullName}'");
+            }
+
+            _proxyDictionary.Add(member, proxyElement);
+            _membersDictionary.Add(member, result);
+
+            return result;
+
         }
 
         /// <summary>
@@ -156,13 +151,13 @@
                 switch (current)
                 {
                     case ListWebElement _:
-                    case IWebElement __:
                     case WebElement ___:
+                    case IWebElement __:
                         break;
                     default:
                         throw new NotImplementedException($"Type '{GetTargetType(member)}' is not supported as child for '{GetTargetType(parentMember)}'");
                 }
-               
+
                 switch (current)
                 {
                     case ListWebElement lwe when parent is WebElement pwe:
@@ -178,12 +173,7 @@
             }
         }
 
-        private static Type GetTargetType(MemberInfo member)
-        {
-            Type targetType = (member as FieldInfo)?.FieldType
-                           ?? (member as PropertyInfo)?.PropertyType;
-            return targetType;
-        }
+        private static Type GetTargetType(MemberInfo member) => (member as FieldInfo)?.FieldType ?? (member as PropertyInfo)?.PropertyType;
 
         private class DefaultPageObjectMemberDecoratorProxy : DefaultPageObjectMemberDecorator
         {

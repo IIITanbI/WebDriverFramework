@@ -71,10 +71,11 @@
             return WrappedDriver.SwitchTo();
         }
 
-        public IWebElement FindElement(By by)
+        public WebElement FindElement(By by)
         {
-            return this.WrappedDriver.FindElement(by);
+            return null;
         }
+        
         public ReadOnlyCollection<IWebElement> FindElements(By by)
         {
             return this.WrappedDriver.FindElements(by);
@@ -82,6 +83,11 @@
         public void Dispose()
         {
             WrappedDriver.Dispose();
+        }
+
+        IWebElement ISearchContext.FindElement(By by)
+        {
+            throw new System.NotImplementedException();
         }
         #endregion
     }

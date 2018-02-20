@@ -1,95 +1,81 @@
-﻿namespace WebDriverFramework
+﻿using System.Collections.ObjectModel;
+
+namespace WebDriverFramework
 {
     using Extension;
     using OpenQA.Selenium;
-    using OpenQA.Selenium.Support.Extensions;
+    using OpenQA.Selenium.Support.PageObjects;
     using Proxy;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
 
-    public class WebElement
+    public interface ISearchContext<T>
+    {
+        T FindElement(By by);
+        ReadOnlyCollection<T> FindElements(By by);
+    }
+
+    public class WebElement : IWebElement
     {
         public static double DefaultWaitTimeout { get; set; } = 60;
 
-        private WebElementProxy _webElementProxy;
-     
-        public WebElement(IWebElement implicitElement, IWebDriver driver) : this(new WebElementProxy(implicitElement), driver)
-        {
-        }
-        public WebElement(IWebElement implicitElement, WebElement parent) : this(new WebElementProxy(implicitElement), parent)
-        {
-        }
+        private WebElement _parent;
 
-        public WebElement(By locator, IWebDriver driver) : this(null, null, driver)
-        {
-            this.WebElementProxy = new WebElementProxy(locator, this);
-        }
-        public WebElement(By locator, WebElement parent) : this(null, parent, parent.WrappedDriver)
-        {
-            this.WebElementProxy = new WebElementProxy(locator, this);
-        }
-
-        public WebElement(WebElementProxy webElementProxy, IWebDriver driver) : this(webElementProxy, null, driver)
+        public WebElement(IWebElement implicitElement, IWebDriver driver) : this(new WebElementProxy(implicitElement), null, driver)
         {
         }
-        public WebElement(WebElementProxy webElementProxy, WebElement parent) : this(webElementProxy, parent, parent.WrappedDriver)
+        public WebElement(By locator, IWebDriver driver) : this(new[] { locator }, driver)
+        {
+        }
+        public WebElement(IEnumerable<By> locators, IWebDriver driver) : this(new WebElementProxy(locators, driver), null, driver)
+        {
+        }
+        public WebElement(By locator, WebElement parent) : this(new WebElementProxy(new[] { locator }, parent.WrappedElement), parent, parent.WrappedDriver)
         {
         }
 
         private WebElement(WebElementProxy webElementProxy, WebElement parent, IWebDriver driver)
         {
             this.WebElementProxy = webElementProxy;
-            this.Parent = parent;
             this.WrappedDriver = driver;
+            this.Parent = parent;
         }
 
-        private WebElementProxy WebElementProxy
-        {
-            get => _webElementProxy;
-            set
-            {
-                _webElementProxy = value;
-                _webElementProxy.Source = this;
-            }
-        }
-
+        protected WebElementProxy WebElementProxy { get; }
         public IWebDriver WrappedDriver { get; }
         public IWebElement WrappedElement => (IWebElement)this.WebElementProxy.GetTransparentProxy();
         public IWebElement Element => this.WrappedElement.Unwrap();
 
-        public List<By> Locators => this.WebElementProxy.Bys?.ToList();
-        public By Locator => Locators.FirstOrDefault();
-
-        public WebElement Parent { get; set; }
-
-        public bool IsCached => this.WebElementProxy.IsCached;
-        public bool Exist
+        public List<By> Locators => this.WebElementProxy.Bys.ToList();
+        public By Locator => this.Locators.FirstOrDefault();
+        public WebElement Parent
         {
-            get
+            get => _parent;
+            set
             {
-                try
-                {
-                    StubActionOnElement();
-                    return true;
-                }
-                catch (NoSuchElementException)
-                {
-                    return false;
-                }
-                catch (StaleElementReferenceException)
-                {
-                    return false;
-                }
+                _parent = value;
+                this.WebElementProxy.Locator = this.GetParentElementLocator();
             }
         }
 
-        public WebElement StubActionOnElement()
+        public bool IsCached => this.WebElementProxy.IsCached;
+        public bool ShouldCached
         {
-            //call any property on element
-            var tagName = Element.TagName;
-            return this;
+            get => this.WebElementProxy.ShouldCached;
+            set => this.WebElementProxy.ShouldCached = value;
+        }
+
+        public bool Exist => this.Element.Exist();
+
+        public WebElement Find(string xpath)
+        {
+            return Get(xpath).Locate();
+        }
+        public WebElement Find(By locator)
+        {
+            return Get(locator).Locate();
         }
 
         public WebElement Get(string xpath)
@@ -101,11 +87,7 @@
             return new WebElement(locator, this);
         }
 
-        public ListWebElement GetAll()
-        {
-            return this.Parent != null ? new ListWebElement(this.Locator, this.Parent) : new ListWebElement(this.Locator, this.WrappedDriver);
-        }
-        public ListWebElement GetAll(string xpath)
+        public ListWebElement GetAll(string xpath = ".//*")
         {
             return GetAll(By.XPath(xpath));
         }
@@ -113,31 +95,11 @@
         {
             return new ListWebElement(locator, this);
         }
-        public ListWebElement GetAllChildren()
-        {
-            return GetAll(By.XPath(".//*"));
-        }
 
         public WebElement Locate()
         {
-            return this.Parent != null ? new WebElement(this.Element, this.Parent) : new WebElement(this.Element, this.WrappedDriver);
+            return new WebElement(this.Element, this.WrappedDriver);
         }
-
-        #region JS
-        public void JSClick()
-        {
-            this.WrappedDriver.ExecuteJavaScript("arguments[0].click()", this.Element);
-        }
-        public void JSScrollIntoView()
-        {
-            this.WrappedDriver.ExecuteJavaScript("arguments[0].scrollIntoView(true)", this.Element);
-        }
-        public void JSScrollTo()
-        {
-            var elem = this.Element;
-            this.WrappedDriver.ExecuteJavaScript($"window.scrollTo({elem.Location.X}, {elem.Location.Y})", elem);
-        }
-        #endregion
 
         #region MyRegion
         public bool Displayed => Element.Displayed;
@@ -148,38 +110,41 @@
         public Point Location => Element.Location;
         public Size Size => Element.Size;
 
+        void IWebElement.SendKeys(string text) => this.Element.SendKeys(text);
+        void IWebElement.Submit() => this.Element.Submit();
+        void IWebElement.Click() => this.Element.Click();
+        void IWebElement.Clear() => this.Element.Clear();
+
         public WebElement Clear()
         {
-            Element.Clear();
+            ((IWebElement)this).Clear();
             return this;
         }
         public WebElement SendKeys(string text)
         {
-            Element.SendKeys(text);
+            ((IWebElement)this).SendKeys(text);
             return this;
         }
         public WebElement Submit()
         {
-            Element.Submit();
+            ((IWebElement)this).Submit();
             return this;
         }
         public WebElement Click()
         {
-            Element.Click();
+            ((IWebElement)this).Click();
             return this;
         }
-        public string GetAttribute(string attributeName)
-        {
-            return Element.GetAttribute(attributeName);
-        }
-        public string GetProperty(string propertyName)
-        {
-            return Element.GetProperty(propertyName);
-        }
-        public string GetCssValue(string propertyName)
-        {
-            return Element.GetCssValue(propertyName);
-        }
+
+        public string GetAttribute(string attributeName) => Element.GetAttribute(attributeName);
+        public string GetProperty(string propertyName) => Element.GetProperty(propertyName);
+        public string GetCssValue(string propertyName) => Element.GetCssValue(propertyName);
+
+        public WebElement FindElement(By by) => this.Get(by).Locate();
+        public ListWebElement FindElements(By by) => this.GetAll(by).Locate();
+
+        IWebElement ISearchContext.FindElement(By by) => this.FindElement(by);
+        ReadOnlyCollection<IWebElement> ISearchContext.FindElements(By by) => this.FindElements(by).Elements.Cast<IWebElement>().ToList().AsReadOnly();
         #endregion
 
         #region Wait
@@ -215,5 +180,10 @@
             return this.TryWait(e => !condition(e), timeout, exceptionTypes);
         }
         #endregion
+
+        protected IElementLocator GetParentElementLocator()
+        {
+            return new DefaultElementLocator(this.Parent != null ? this.Parent.WrappedElement : (ISearchContext)this.WrappedDriver);
+        }
     }
 }

@@ -10,40 +10,34 @@
     using System.Runtime.Remoting;
     using System.Runtime.Remoting.Messaging;
 
-    public interface IProxiable
-    {
-        bool IsCached { get; }
-    }
-
-    public class WebElementProxy : DriverObjectProxy, IRemotingTypeInfo, IProxiable, IWrapsElement
+    public class WebElementProxy : DriverObjectProxy, IRemotingTypeInfo, ICacheable, IWrapsElement
     {
         private static List<Type> InterfacesToBeProxied => new List<Type>
         {
             typeof(ILocatable),
             typeof(IWebElement),
             typeof(IWrapsElement),
-            typeof(IProxiable)
+            typeof(ICacheable)
         };
 
         private IWebElement cachedElement;
 
-        public WebElementProxy(IWebElement element) : this(null, null, true)
+        public WebElementProxy(IWebElement element) : this(null, null, null, true)
         {
             this.cachedElement = element;
         }
-        public WebElementProxy(By by, WebElement source, bool shouldCached = false)
-            : this(typeof(IWebElement), null, new[] { by }, shouldCached)
+
+        public WebElementProxy(IEnumerable<By> bys, ISearchContext context, bool shouldCached = false)
+            : this(typeof(IWebElement), new DefaultElementLocator(context), bys, shouldCached)
         {
-            this.Source = source;
         }
+
         public WebElementProxy(Type typeToBeProxied, IElementLocator locator, IEnumerable<By> bys, bool shouldCached)
             : base(typeToBeProxied, locator, bys, shouldCached)
         {
         }
-       
-        public WebElement Source;
 
-        public bool IsCached => (cachedElement as IProxiable)?.IsCached ?? cachedElement is RemoteWebElement;
+        public bool IsCached => (cachedElement as ICacheable)?.IsCached ?? cachedElement is RemoteWebElement;
 
         public IWebElement WrappedElement
         {
@@ -54,17 +48,7 @@
                     return this.cachedElement;
                 }
 
-                IWebElement element;
-                if (this.Source != null)
-                {
-                    var context = this.Source.Parent?.Element ?? (ISearchContext)this.Source.WrappedDriver;
-                    element = new DefaultElementLocator(context).LocateElement(this.Bys);
-                }
-                else
-                {
-                    element = this.Locator.LocateElement(this.Bys);
-                }
-
+                var element = this.Locator.LocateElement(this.Bys);
                 if (this.ShouldCached)
                 {
                     this.cachedElement = element;
@@ -79,7 +63,7 @@
             IMethodCallMessage methodCallMessage = msg as IMethodCallMessage;
 
             var declaringType = (methodCallMessage.MethodBase as MethodInfo).DeclaringType;
-            if (typeof(IProxiable) == declaringType)
+            if (typeof(ICacheable) == declaringType)
             {
                 return InvokeMethod(this, methodCallMessage);
             }

@@ -48,7 +48,7 @@ namespace ConsoleApp1
 
         public Program(WebDriver driver)
         {
-            CustomPageFactory.InitElements(this, driver, new CustomPageObjectMemberDecorator(driver.WrappedDriver));
+            CustomPageFactory.InitElements(this, driver, new CustomPageObjectMemberDecorator());
         }
 
         public static void AssertTrue(bool value)
@@ -68,6 +68,17 @@ namespace ConsoleApp1
         }
         static void Main(string[] args)
         {
+
+            var t = new WebElement(By.XPath("asd"), (IWebDriver)null);
+            t.Clear().SendKeys("asd").Submit().WaitUntil(Condition.NotExist);
+            ((IWebElement)t).FindElement(By.XPath("ad"));
+            var tt = (IWebElement) t;
+            if (t.Exist())
+            {
+
+            }
+            tt.Clear();
+            t.SendKeys("asd");
             Dictionary<int, int> dict = new Dictionary<int, int>()
             {
                 {1, 2},
@@ -83,7 +94,7 @@ namespace ConsoleApp1
 
             if (dict?.Any() != true)
             {
-                
+
             }
             var all = dict.Keys.Concat(dict.Values).Distinct().ToList();
             var graph = new Graph<int>(dict, all);
@@ -102,6 +113,8 @@ namespace ConsoleApp1
 
             var _driver = new ChromeDriver(opt);
             var driver = new WebDriver(_driver);
+
+            var z = driver.SwitchTo().Frame("asdasd").FindElement(".//asd");
             driver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
             // driver.Navigate().GoToUrl("https://onliner.by");
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
