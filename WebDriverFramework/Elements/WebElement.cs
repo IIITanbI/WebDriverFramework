@@ -69,37 +69,17 @@ namespace WebDriverFramework
 
         public bool Exist => this.Element.Exist();
 
-        public WebElement Find(string xpath)
-        {
-            return Get(xpath).Locate();
-        }
-        public WebElement Find(By locator)
-        {
-            return Get(locator).Locate();
-        }
+        public WebElement Find(string xpath) => Find(By.XPath(xpath));
+        public WebElement Find(By locator) => Get(locator).Locate();
+        public ListWebElement FindAll(string xpath = ".//*") => FindAll(By.XPath(xpath));
+        public ListWebElement FindAll(By locator) => GetAll(locator).Locate();
 
-        public WebElement Get(string xpath)
-        {
-            return Get(By.XPath(xpath));
-        }
-        public WebElement Get(By locator)
-        {
-            return new WebElement(locator, this);
-        }
+        public WebElement Get(string xpath) => Get(By.XPath(xpath));
+        public WebElement Get(By locator) => new WebElement(locator, this);
+        public ListWebElement GetAll(string xpath = ".//*") => GetAll(By.XPath(xpath));
+        public ListWebElement GetAll(By locator) => new ListWebElement(locator, this);
 
-        public ListWebElement GetAll(string xpath = ".//*")
-        {
-            return GetAll(By.XPath(xpath));
-        }
-        public ListWebElement GetAll(By locator)
-        {
-            return new ListWebElement(locator, this);
-        }
-
-        public WebElement Locate()
-        {
-            return new WebElement(this.Element, this.WrappedDriver);
-        }
+        public WebElement Locate() => new WebElement(this.Element, this.WrappedDriver);
 
         #region MyRegion
         public bool Displayed => Element.Displayed;
@@ -140,11 +120,8 @@ namespace WebDriverFramework
         public string GetProperty(string propertyName) => Element.GetProperty(propertyName);
         public string GetCssValue(string propertyName) => Element.GetCssValue(propertyName);
 
-        public WebElement FindElement(By by) => this.Get(by).Locate();
-        public ListWebElement FindElements(By by) => this.GetAll(by).Locate();
-
-        IWebElement ISearchContext.FindElement(By by) => this.FindElement(by);
-        ReadOnlyCollection<IWebElement> ISearchContext.FindElements(By by) => this.FindElements(by).Elements.Cast<IWebElement>().ToList().AsReadOnly();
+        public IWebElement FindElement(By by) => this.Find(by);
+        public ReadOnlyCollection<IWebElement> FindElements(By by) => this.FindAll(by).Elements.Cast<IWebElement>().ToList().AsReadOnly();
         #endregion
 
         #region Wait

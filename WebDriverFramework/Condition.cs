@@ -1,11 +1,9 @@
-﻿using OpenQA.Selenium;
-using System;
-using System.Collections.Generic;
-using WebDriverFramework.Extension;
-
-namespace WebDriverFramework
+﻿namespace WebDriverFramework
 {
-    public class Condition
+    using OpenQA.Selenium;
+    using Extension;
+
+    public static class Condition
     {
         public static bool Exist(IWebElement e) => e.Exist();
         public static bool NotExist(IWebElement e) => !Exist(e);

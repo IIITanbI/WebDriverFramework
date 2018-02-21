@@ -15,14 +15,6 @@
         private readonly Dictionary<MemberInfo, object> _membersDictionary = new Dictionary<MemberInfo, object>();
         private readonly Dictionary<MemberInfo, DriverObjectProxy> _proxyDictionary = new Dictionary<MemberInfo, DriverObjectProxy>();
 
-        /// <summary>
-        /// Locates an element or list of elements for a Page Object member, and returns a
-        /// proxy object for the element or list of elements.
-        /// </summary>
-        /// <param name="member">The <see cref="MemberInfo"/> containing information about
-        /// a class's member.</param>
-        /// <param name="locator">The <see cref="IElementLocator"/> used to locate elements.</param>
-        /// <returns>A transparent proxy to the WebDriver element object.</returns>
         public object Decorate(MemberInfo member, IElementLocator locator)
         {
             object proxyObject = DecorateObject(member, locator);
@@ -78,12 +70,6 @@
 
         }
 
-        /// <summary>
-        /// Creates a list of <see cref="By"/> locators based on the attributes of this member.
-        /// </summary>
-        /// <param name="member">The <see cref="MemberInfo"/> containing information about
-        /// the member of the Page Object class.</param>
-        /// <returns>A list of <see cref="By"/> locators based on the attributes of this member.</returns>
         private static List<By> CreateLocatorList(MemberInfo member)
         {
             List<By> bys = DefaultPageObjectMemberDecoratorProxy.CreateLocatorList(member).ToList();

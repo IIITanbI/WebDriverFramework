@@ -51,7 +51,7 @@ namespace WebDriverFramework
 
         public int Count => this.Elements.Count;
         public WebElement this[int index] => this.Elements[index];
-      
+
         public List<WebElement> Get(By locator)
         {
             return this.Elements.Select(e => e.Get(locator)).ToList();

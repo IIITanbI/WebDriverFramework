@@ -73,6 +73,9 @@ namespace ConsoleApp1
             t.Clear().SendKeys("asd").Submit().WaitUntil(Condition.NotExist);
             ((IWebElement)t).FindElement(By.XPath("ad"));
             var tt = (IWebElement) t;
+            tt.WaitUntil(Condition.NotExist, 30);
+            tt.WaitWhile(Condition.Exist);
+            tt.TryWaitUntil(Condition.Exist, 30);
             if (t.Exist())
             {
 
@@ -129,52 +132,8 @@ namespace ConsoleApp1
             Console.WriteLine(pr.element2.Text);
             Console.WriteLine(p2.IsCached);
             Console.WriteLine();
-            // Console.WriteLine(driver.GetImplicitWait());
-            {
-                {
-                    var sw = Stopwatch.StartNew();
-                    driver.Get("sadlkjaslkjd").Wait(Condition.Displayed, 20);
-                    var exi2t = driver.Get(".//*[@class='test']").Locate().WaitUntil(Condition.NotExist);
-                    var exi3t = driver.Get("sadlkjaslkjd").Wait(Condition.Exist, 20);
-                    var exiat = driver.Get("sadlkjaslkjd");
-                    var exsiat = driver.Get("sadlkjaslkjd").ShouldBe(Condition.Exist);
-                    var exs2at = driver.Get("sadlkjaslkjd").ShouldNot(Condition.Exist);
-                    // var eaiatj = driver.Get("sadlkjaslkjd").ShouldBe(e => e.Exist);
-                    AssertTrue(exiat.Displayed);
-                    // AssertTrue(exiat.ShouldBe(e => e.Exist, 20));
-                    // AssertTrue(exiat.ShouldBe(Condition.NotExist, 20));
-                    sw.Stop();
-                    Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
-                }
-                Console.WriteLine(driver.GetImplicitWait());
-                {
-                    {
-                        var sw = Stopwatch.StartNew();
-                        var exist = driver.Get("sadlkjaslkjd").WaitUntil(Condition.Exist, 10).Exist;
-                        var isexist = driver.Get("sadlkjaslkjd").Wait(Condition.Exist, 10);
-                        var issist = driver.Get("sadlkjaslkjd").WaitUntil(Condition.Exist, 10);
-                        var is1ist = driver.Get("sadlkjaslkjd").WaitUntil(zl => zl.Text == "test", 10);
 
-
-                        var isesist = driver.Get("sadlkjaslkjd").TryWait(ee => ee.Exist);
-                        sw.Stop();
-                        Console.WriteLine("lvl 2 :" + sw.ElapsedMilliseconds);
-                        Console.WriteLine(driver.GetImplicitWait());
-                    }
-                };
-                Console.WriteLine(driver.GetImplicitWait());
-                {
-                    var sw = Stopwatch.StartNew();
-                    //var exist = driver.Get("sadlkjaslkjd").SetSearchElementTimeout(20).Exist;
-                    sw.Stop();
-                    Console.WriteLine("lvl 1 :" + sw.ElapsedMilliseconds);
-                    Console.WriteLine(driver.GetImplicitWait());
-                }
-            };
-            Console.WriteLine(driver.GetImplicitWait());
-
-
-            var elements = driver.Get("/*").GetAll(".//*");
+            var elements = driver.Get("/*").GetAll();
             var zzzxczx = elements.Count;
             var test = elements.Locate();
             test.CheckStaleness();

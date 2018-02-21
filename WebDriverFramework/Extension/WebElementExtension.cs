@@ -142,10 +142,6 @@ namespace WebDriverFramework.Extension
             return element;
         }
 
-        public static T GetTParent<T>(this ISearchContext<T> element)
-        {
-            return element.FindElement(By.XPath("./.."));
-        }
         public static IWebElement GetParent(this ISearchContext element)
         {
             return element.FindElement(By.XPath("./.."));
@@ -157,6 +153,48 @@ namespace WebDriverFramework.Extension
         public static ReadOnlyCollection<IWebElement> FindElements(this ISearchContext context, string xpath)
         {
             return context.FindElements(By.XPath(xpath));
+        }
+
+
+        public static T Wait<T>(this IWebElement element, Func<IWebElement, T> condition, double timeout = -1, params Type[] exceptionTypes)
+        {
+            return element.GetDriver().Wait(d => condition(element), timeout, exceptionTypes);
+        }
+
+        public static IWebElement WaitUntil(this IWebElement element, Func<IWebElement, bool> condition, double timeout = -1, params Type[] exceptionTypes)
+        {
+            Wait(element, condition, timeout, exceptionTypes);
+            return element;
+        }
+        public static IWebElement WaitWhile(this IWebElement element, Func<IWebElement, bool> condition, double timeout = -1, params Type[] exceptionTypes)
+        {
+            Wait(element, e => !condition(e), timeout, exceptionTypes);
+            return element;
+        }
+
+        public static bool TryWaitUntil(this IWebElement element, Func<IWebElement, bool> condition, double timeout = -1, params Type[] exceptionTypes)
+        {
+            try
+            {
+                WaitUntil(element, condition, timeout, exceptionTypes);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public static bool TryWaitWhile(this IWebElement element, Func<IWebElement, bool> condition, double timeout = -1, params Type[] exceptionTypes)
+        {
+            try
+            {
+                WaitWhile(element, condition, timeout, exceptionTypes);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

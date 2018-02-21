@@ -10,13 +10,13 @@
 
         private static TimeSpan DefaultSleepTimeout => TimeSpan.FromMilliseconds(500);
 
-        public SimpleWait(TimeSpan timeout) : this(timeout, DefaultSleepTimeout)
+        public SimpleWait(double timeout) : this(timeout, DefaultSleepTimeout)
         {
         }
 
-        public SimpleWait(TimeSpan timeout, TimeSpan sleepInterval)
+        public SimpleWait(double timeout, TimeSpan sleepInterval)
         {
-            this.Timeout = timeout;
+            this.Timeout =TimeSpan.FromSeconds(timeout);
             this.PollingInterval = sleepInterval;
             this.IgnoreExceptionTypes(typeof(NoSuchElementException));
         }
