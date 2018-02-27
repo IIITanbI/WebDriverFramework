@@ -11,10 +11,6 @@ namespace WebDriverFramework
 {
     public static class WebElementExtension
     {
-        public static TElement Locate<TElement>(this TElement element) where TElement : WebElement, ILocate<TElement>
-        {
-            return ElementFactory.Create<TElement>(element.Element, element.WrappedDriver).Locate();
-        }
         public static TElement Click<TElement>(this TElement element) where TElement : WebElement
         {
             element.Element.Click();
@@ -52,11 +48,6 @@ namespace WebDriverFramework
         }
     }
 
-    public interface ILocate<out T>
-    {
-        T Locate();
-    }
-
     public static class ElementFactory
     {
         public static object Create(Type type, By locator, WebElement parent, IWebDriver driver = null)
@@ -78,21 +69,6 @@ namespace WebDriverFramework
         }
     }
 
-    public abstract class WebElement<T> : WebElement//, ILocate<T>
-    {
-        protected WebElement(IWebElement implicitElement, IWebDriver driver) : base(implicitElement, driver)
-        {
-        }
-        protected WebElement(By locator, WebElement parent, IWebDriver driver = null) : base(locator, parent, driver)
-        {
-        }
-        protected WebElement(string xpath, WebElement parent, IWebDriver driver = null) : base(xpath, parent, driver)
-        {
-        }
-
-        //public T Locate() => ElementFactory.Create<T>(Element, WrappedDriver);
-    }
-
     public interface IBaseWebElement
     {
         IWebDriver WrappedDriver { get; }
@@ -100,7 +76,10 @@ namespace WebDriverFramework
         IWebElement Element { get; }
         By Locator { get; }
     }
-
+    public interface ILocate<out T>
+    {
+        T Locate();
+    }
     public interface IFindElement<T> where T : ILocate<T>
     {
         T Find(string xpath);
@@ -112,7 +91,6 @@ namespace WebDriverFramework
         IEnumerable<T> GetAll(string xpath);
         IEnumerable<T> GetAll(By locator);
     }
-
     public interface IFindElement
     {
         T Find<T>(string xpath) where T : ILocate<T>;
@@ -124,7 +102,6 @@ namespace WebDriverFramework
         IEnumerable<T> GetAll<T>(string xpath);
         IEnumerable<T> GetAll<T>(By locator);
     }
-
 
     public abstract class WebElement : IBaseWebElement, IFindElement, IFindElement<LabelElement>
     {
@@ -219,7 +196,7 @@ namespace WebDriverFramework
         }
     }
 
-    public class LabelElement : WebElement<LabelElement>, ILocate<LabelElement>
+    public class LabelElement : WebElement, ILocate<LabelElement>
     {
         public LabelElement(IWebElement implicitElement, IWebDriver driver) : base(implicitElement, driver)
         {

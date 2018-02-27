@@ -2,9 +2,9 @@
 {
     public static class Condition
     {
-        public static bool Exist(BaseWebElement e) => e.Exist;
-        public static bool NotExist(BaseWebElement e) => !e.Exist;
-        public static bool Displayed(BaseWebElement e) => e.Exist && e.Displayed;
-        public static bool NotDisplayed(BaseWebElement e) => !e.Displayed;
+        public static bool Exist(WebElement e) => e.Exist;
+        public static bool NotExist(WebElement e) => !e.Exist;
+        public static bool Displayed(WebElement e) => e.Exist && e.Displayed;
+        public static bool NotDisplayed(WebElement e) => !e.Displayed;
     }
 }

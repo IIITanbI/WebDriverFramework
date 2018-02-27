@@ -118,7 +118,7 @@ namespace ConsoleApp1
             driver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
             // driver.Navigate().GoToUrl("https://onliner.by");
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
-            var label = new LabelElement(By.XPath("asdsad"), null, driver);
+            var label = new CheckBox(By.XPath("asdsad"), null, driver).WaitUntil(ch => ch.Selected);
             var checkbox = new LabelElement(By.XPath("asdsad"), null, driver);
             var c1eckbox = ElementFactory.Create<CheckBox>(By.XPath("asdsad"), null, driver);
             var z = checkbox.Wait(elemet => elemet.Displayed);
@@ -140,7 +140,7 @@ namespace ConsoleApp1
 
             var elements = driver.Get("/*").FindAll();
             var zzzxczx = elements.Count;
-            var test = (elements).Locate();
+            var test = (elements).LocateAll();
             var test1 = elements.ToList();
             var rrrrr = pr.element1.Get(".").Locate();
 
