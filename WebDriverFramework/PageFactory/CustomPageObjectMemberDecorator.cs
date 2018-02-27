@@ -42,20 +42,17 @@
             DriverObjectProxy proxyElement = null;
             if (typeof(WebElement).IsAssignableFrom(targetType))
             {
-                result = new WebElement(bys, driver) { ShouldCached = cache };
+                result = ElementFactory.Create(targetType, bys.First(), null, driver);
+                //result = new WebElement(bys, driver) { ShouldCached = cache };
             }
-            else if (typeof(IWebElement).IsAssignableFrom(targetType))
+            else if (targetType == typeof(IWebElement))
             {
-                proxyElement = new WebElementProxy(typeof(IWebElement), locator, bys, cache);
+                proxyElement = new WebElementProxy(targetType, locator, bys, cache);
                 result = proxyElement.GetTransparentProxy();
             }
-            else if (targetType == typeof(ListWebElement))
+            else if (targetType.IsAssignableFrom(typeof(List<IWebElement>)))
             {
-                result = new ListWebElement(bys, driver);
-            }
-            else if (targetType == typeof(IList<IWebElement>))
-            {
-                proxyElement = new WebElementListProxy(typeof(IList<IWebElement>), locator, bys, cache);
+                proxyElement = new WebElementListProxy(targetType, locator, bys, cache);
                 result = proxyElement.GetTransparentProxy();
             }
             else
@@ -67,7 +64,6 @@
             _membersDictionary.Add(member, result);
 
             return result;
-
         }
 
         private static List<By> CreateLocatorList(MemberInfo member)
@@ -125,7 +121,7 @@
                 switch (parent)
                 {
                     case WebElement w:
-                        context = w.WrappedElement;
+                        context = w.ProxyElement;
                         break;
                     case IWebElement iw:
                         context = iw;
@@ -136,7 +132,6 @@
 
                 switch (current)
                 {
-                    case ListWebElement _:
                     case WebElement ___:
                     case IWebElement __:
                         break;
@@ -146,9 +141,6 @@
 
                 switch (current)
                 {
-                    case ListWebElement lwe when parent is WebElement pwe:
-                        lwe.Parent = pwe;
-                        break;
                     case WebElement we when parent is WebElement pwe:
                         we.Parent = pwe;
                         break;

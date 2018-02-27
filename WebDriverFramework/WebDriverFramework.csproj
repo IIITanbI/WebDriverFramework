@@ -54,8 +54,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Condition.cs" />
+    <Compile Include="Elements\BaseWebElement.cs" />
     <Compile Include="Extension\WebElementExtensionJS.cs" />
-    <Compile Include="ListWebElement.cs" />
+    <Compile Include="Elements\ElementListExtension.cs" />
     <Compile Include="Proxy\ICacheable.cs" />
     <Compile Include="SimpleWait.cs" />
     <Compile Include="PageFactory\Attributes\ByClassNameAttribute.cs" />
@@ -73,7 +74,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extension\WebDriverExtension.cs" />
     <Compile Include="Extension\WebDriverWaitExtension.cs" />
-    <Compile Include="WebElement.cs" />
+    <Compile Include="Elements\WebElement.cs" />
     <Compile Include="Extension\WebElementExtension.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

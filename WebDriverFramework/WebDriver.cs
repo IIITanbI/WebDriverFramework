@@ -1,4 +1,7 @@
-﻿namespace WebDriverFramework
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace WebDriverFramework
 {
     using OpenQA.Selenium;
     using OpenQA.Selenium.Internal;
@@ -13,31 +16,28 @@
 
         public IWebDriver WrappedDriver { get; }
 
-        public WebElement Get(string xpath)
-        {
-            return Get(By.XPath(xpath));
-        }
-        public WebElement Get(By locator)
-        {
-            return new WebElement(locator, this.WrappedDriver);
-        }
-        public ListWebElement GetAll(string xpath)
-        {
-            return GetAll(By.XPath(xpath));
-        }
-        public ListWebElement GetAll(By locator)
-        {
-            return new ListWebElement(locator, this.WrappedDriver);
-        }
+        public T Find<T>(string xpath) where T : ILocate<T> => Find<T>(By.XPath(xpath));
+        public T Find<T>(By locator) where T : ILocate<T> => ElementFactory.Create<T>(locator, null, this).Locate();
+        public IList<T> FindAll<T>(string xpath = ".//*") where T : ILocate<T> => FindAll<T>(By.XPath(xpath));
+        public IList<T> FindAll<T>(By locator) where T : ILocate<T> => GetAll<T>(locator).LocateAll().ToList();
 
-        public WebElement WaitForPresent(By locator, double timeout = -1)
-        {
-            return this.Get(locator).WaitUntil(Condition.Exist, timeout);
-        }
-        public WebElement WaitForPresent(string xpath, double timeout = -1)
-        {
-            return WaitForPresent(By.XPath(xpath), timeout);
-        }
+        public T Get<T>(string xpath) => Get<T>(By.XPath(xpath));
+        public T Get<T>(By locator) => ElementFactory.Create<T>(locator, null, this);
+        public IEnumerable<T> GetAll<T>(string xpath) => GetAll<T>(By.XPath(xpath));
+        public IEnumerable<T> GetAll<T>(By locator) => this.WrappedDriver.FindElements(locator).Select(e => ElementFactory.Create<T>(e, this));
+
+        public LabelElement Find(string xpath) => Find<LabelElement>(xpath);
+        public LabelElement Find(By locator) => Find<LabelElement>(locator);
+        public IList<LabelElement> FindAll(string xpath = ".//*") => FindAll<LabelElement>(xpath);
+        public IList<LabelElement> FindAll(By locator) => FindAll<LabelElement>(locator);
+
+        public LabelElement Get(string xpath) => Get<LabelElement>(xpath);
+        public LabelElement Get(By locator) => Get<LabelElement>(locator);
+        public IEnumerable<LabelElement> GetAll(string xpath) => GetAll<LabelElement>(xpath);
+        public IEnumerable<LabelElement> GetAll(By locator) => GetAll<LabelElement>(locator);
+
+        public WebElement WaitForPresent(By locator, double timeout = -1) => this.Get(locator).WaitUntil(Condition.Exist, timeout);
+        public WebElement WaitForPresent(string xpath, double timeout = -1) => WaitForPresent(By.XPath(xpath), timeout);
 
         #region MyRegion
         public string Url
@@ -75,7 +75,7 @@
         {
             return null;
         }
-        
+
         public ReadOnlyCollection<IWebElement> FindElements(By by)
         {
             return this.WrappedDriver.FindElements(by);

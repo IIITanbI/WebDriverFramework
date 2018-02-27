@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props" Condition="Exists('..\..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -35,8 +36,25 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NLog.4.4.12\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.9.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NUnit.3.9.0\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="ReportPortal.Client, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Users\Artsiom_Kuis\Downloads\agent-net-nunit-master\agent-net-nunit-master\ReportPortal.NUnitExtension\bin\Debug\net45\ReportPortal.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=105.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RestSharp.105.2.1\lib\net46\RestSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -57,9 +75,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="NLog.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
+    <None Include="ReportPortal.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Users\Artsiom_Kuis\Downloads\agent-net-nunit-master\agent-net-nunit-master\ReportPortal.NUnitExtension\ReportPortal.NUnitExtension.csproj">
+      <Project>{5dc6aaf5-1efe-4793-9a99-4fdcba734120}</Project>
+      <Name>ReportPortal.NUnitExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Users\Artsiom_Kuis\Downloads\commons-net-master\commons-net-master\ReportPortal.Shared\ReportPortal.Shared.csproj">
+      <Project>{0258995b-90eb-443a-8e73-8c14b815ed7b}</Project>
+      <Name>ReportPortal.Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Users\Artsiom_Kuis\Downloads\logger-net-nlog-master\logger-net-nlog-master\ReportPortal.NLog\ReportPortal.NLog.csproj">
+      <Project>{bd4c80f7-8928-481f-9f58-1cd4708d7fc8}</Project>
+      <Name>ReportPortal.NLog</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\WebDriverFramework\WebDriverFramework.csproj">
       <Project>{95440912-8c1c-4a3a-a6ac-836278831f7e}</Project>
       <Name>WebDriverFramework</Name>
@@ -75,6 +114,7 @@
     <Error Condition="!Exists('..\..\packages\Selenium.WebDriver.GeckoDriver.0.19.1\build\Selenium.WebDriver.GeckoDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Selenium.WebDriver.GeckoDriver.0.19.1\build\Selenium.WebDriver.GeckoDriver.targets'))" />
     <Error Condition="!Exists('..\..\packages\Selenium.WebDriver.IEDriver.3.9.0\build\Selenium.WebDriver.IEDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Selenium.WebDriver.IEDriver.3.9.0\build\Selenium.WebDriver.IEDriver.targets'))" />
     <Error Condition="!Exists('..\..\packages\Selenium.WebDriver.MicrosoftWebDriver.10.0.15063\build\Selenium.WebDriver.MicrosoftWebDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Selenium.WebDriver.MicrosoftWebDriver.10.0.15063\build\Selenium.WebDriver.MicrosoftWebDriver.targets'))" />
+    <Error Condition="!Exists('..\..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props'))" />
   </Target>
   <Import Project="..\..\packages\Selenium.WebDriver.GeckoDriver.0.19.1\build\Selenium.WebDriver.GeckoDriver.targets" Condition="Exists('..\..\packages\Selenium.WebDriver.GeckoDriver.0.19.1\build\Selenium.WebDriver.GeckoDriver.targets')" />
   <Import Project="..\..\packages\Selenium.WebDriver.IEDriver.3.9.0\build\Selenium.WebDriver.IEDriver.targets" Condition="Exists('..\..\packages\Selenium.WebDriver.IEDriver.3.9.0\build\Selenium.WebDriver.IEDriver.targets')" />

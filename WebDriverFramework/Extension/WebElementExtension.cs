@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using WebDriverFramework.Proxy;
 
 namespace WebDriverFramework.Extension
 {
@@ -8,12 +7,8 @@ namespace WebDriverFramework.Extension
     using System.Windows.Forms;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Internal;
-    using OpenQA.Selenium.Remote;
     using Keys = OpenQA.Selenium.Keys;
 
-    /// <summary>
-    /// <see cref="IWebElement"/> extension
-    /// </summary>
     public static partial class WebElementExtension
     {
         /// <summary>

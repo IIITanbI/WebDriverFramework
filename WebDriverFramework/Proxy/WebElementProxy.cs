@@ -22,7 +22,7 @@
 
         private IWebElement cachedElement;
 
-        public WebElementProxy(IWebElement element) : this(null, null, null, true)
+        public WebElementProxy(IWebElement element) : this(typeof(IWebElement), null, null, true)
         {
             this.cachedElement = element;
         }
