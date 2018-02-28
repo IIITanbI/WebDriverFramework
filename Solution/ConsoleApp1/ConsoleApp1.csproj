@@ -87,16 +87,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Users\Artsiom_Kuis\Downloads\agent-net-nunit-master\agent-net-nunit-master\ReportPortal.NUnitExtension\ReportPortal.NUnitExtension.csproj">
-      <Project>{5dc6aaf5-1efe-4793-9a99-4fdcba734120}</Project>
-      <Name>ReportPortal.NUnitExtension</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Users\Artsiom_Kuis\Downloads\commons-net-master\commons-net-master\ReportPortal.Shared\ReportPortal.Shared.csproj">
-      <Project>{0258995b-90eb-443a-8e73-8c14b815ed7b}</Project>
-      <Name>ReportPortal.Shared</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Users\Artsiom_Kuis\Downloads\logger-net-nlog-master\logger-net-nlog-master\ReportPortal.NLog\ReportPortal.NLog.csproj">
-      <Project>{bd4c80f7-8928-481f-9f58-1cd4708d7fc8}</Project>
+    <ProjectReference Include="..\..\ReportPortal\logger-net-nlog-master\ReportPortal.NLog\ReportPortal.NLog.csproj">
+      <Project>{70180475-1419-4479-aba5-c910ee5ce3fa}</Project>
       <Name>ReportPortal.NLog</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\WebDriverFramework\WebDriverFramework.csproj">

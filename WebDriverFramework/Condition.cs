@@ -1,5 +1,7 @@
 ﻿namespace WebDriverFramework
 {
+    using Elements;
+
     public static class Condition
     {
         public static bool Exist(WebElement e) => e.Exist;

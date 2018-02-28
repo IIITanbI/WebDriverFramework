@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net45;</TargetFrameworks>
+
+    <Authors>reportportal</Authors>
+    <Company>Report Portal</Company>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/reportportal/client-net/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>http://reportportal.io</PackageProjectUrl>
+    <PackageIconUrl>https://reportportal.github.io/img/rp_logo.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/reportportal/client-net</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>reportportal api client testing</PackageTags>
+    <Version>2.0.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.1'">
+    <PackageReference Include="System.Net.Http" Version="4.3.3" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>

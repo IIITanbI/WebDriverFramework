@@ -1,6 +1,7 @@
 ﻿namespace WebDriverFramework.PageFactory
 {
     using Attributes;
+    using Elements;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Support.PageObjects;
     using Proxy;
@@ -16,12 +17,6 @@
         private readonly Dictionary<MemberInfo, DriverObjectProxy> _proxyDictionary = new Dictionary<MemberInfo, DriverObjectProxy>();
 
         public object Decorate(MemberInfo member, IElementLocator locator)
-        {
-            object proxyObject = DecorateObject(member, locator);
-            return proxyObject;
-        }
-
-        private object DecorateObject(MemberInfo member, IElementLocator locator)
         {
             if (!(member is FieldInfo) && (member as PropertyInfo)?.CanWrite != true)
             {
@@ -43,7 +38,6 @@
             if (typeof(WebElement).IsAssignableFrom(targetType))
             {
                 result = ElementFactory.Create(targetType, bys.First(), null, driver);
-                //result = new WebElement(bys, driver) { ShouldCached = cache };
             }
             else if (targetType == typeof(IWebElement))
             {

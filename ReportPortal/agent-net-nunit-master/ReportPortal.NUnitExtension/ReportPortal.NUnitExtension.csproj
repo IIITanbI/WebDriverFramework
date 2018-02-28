@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+    <Version>3.3.0-beta1</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>ReportPortal.NUnit</PackageId>
+    <Authors>reportportal</Authors>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/reportportal/agent-net-nunit/master/LICENSE</PackageLicenseUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.9.0" />
+    <PackageReference Include="NUnit.Engine.Api" Version="3.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\client-net-master\client-net-master\ReportPortal.Client\ReportPortal.Client.csproj" />
+    <ProjectReference Include="..\..\commons-net-master\ReportPortal.Shared\ReportPortal.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

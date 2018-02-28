@@ -19,18 +19,9 @@ using NLog.Targets;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Edge;
-using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.IE;
-using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.Internal;
-using OpenQA.Selenium.Remote;
-using OpenQA.Selenium.Support.Extensions;
 using OpenQA.Selenium.Support.PageObjects;
-using ReportPortal.Client;
-using ReportPortal.NUnitExtension.Configuration;
-using ReportPortal.Shared;
 using WebDriverFramework;
+using WebDriverFramework.Elements;
 using WebDriverFramework.Extension;
 using WebDriverFramework.PageFactory;
 using WebDriverFramework.PageFactory.Attributes;
@@ -62,7 +53,7 @@ namespace ConsoleApp1
 
         public Program(WebDriver driver)
         {
-            CustomPageFactory.InitElements(this, driver, new CustomPageObjectMemberDecorator());
+            CustomPageFactory.InitElements(this, driver.WrappedDriver, new CustomPageObjectMemberDecorator());
         }
 
         public static void AssertTrue(bool value)
@@ -115,21 +106,22 @@ namespace ConsoleApp1
             var _driver = new ChromeDriver(opt);
             var driver = new WebDriver(_driver);
 
-            driver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
+            driver.WrappedDriver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
             // driver.Navigate().GoToUrl("https://onliner.by");
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
-            var label = new CheckBox(By.XPath("asdsad"), null, driver).WaitUntil(ch => ch.Selected);
-            var checkbox = new LabelElement(By.XPath("asdsad"), null, driver);
-            var c1eckbox = ElementFactory.Create<CheckBox>(By.XPath("asdsad"), null, driver);
+            var label = new CheckBox(By.XPath("asdsad"), null, driver.WrappedDriver).WaitUntil(ch => ch.Selected);
+            var checkbox = new LabelElement(By.XPath("asdsad"), null, driver.WrappedDriver);
+            var c1eckbox = ElementFactory.Create<CheckBox>(By.XPath("asdsad"), null, driver.WrappedDriver);
             var z = checkbox.Wait(elemet => elemet.Displayed);
-            var resultas = label.Click();
-            var result1s = checkbox.Click().Locate();
+            label.Click();
+            checkbox.Click();
+            var result1s = checkbox.Locate();
             driver.Find("//input[@id='input']").Click();
 
             var pr = new Program(driver);
-            var p1 = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(driver), new[] { By.XPath(".//*") }, true);
+            var p1 = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(driver.WrappedDriver), new[] { By.XPath(".//*") }, true);
             var tp1 = p1.GetTransparentProxy();
-            p1.Locator = new DefaultElementLocator(driver);
+            p1.Locator = new DefaultElementLocator(driver.WrappedDriver);
             var tp2 = p1.GetTransparentProxy();
             Console.WriteLine(tp1 == tp2);
             //Console.WriteLine(p1.WrappedElement.TagName);
@@ -144,7 +136,7 @@ namespace ConsoleApp1
             var test1 = elements.ToList();
             var rrrrr = pr.element1.Get(".").Locate();
 
-            var el = driver.WaitForPresent("//some");
+            var el = driver.Get<CheckBox>("//some").WaitUntil(Condition.Exist);
             var el1 = driver.Get("//some").WaitUntil(Condition.Exist);
 
 
@@ -156,7 +148,7 @@ namespace ConsoleApp1
             var vis = pr.element2.Text;
             var vis3 = pr.element3.Text;
             var vis4 = pr.element4.ToList();
-            driver.Quit();
+            driver.WrappedDriver.Quit();
         }
 
         public Program()
