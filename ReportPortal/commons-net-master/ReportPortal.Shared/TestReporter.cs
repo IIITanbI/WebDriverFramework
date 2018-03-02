@@ -77,6 +77,7 @@ namespace ReportPortal.Shared
                     catch (TaskCanceledException tce)
                     {
                         exceptions.Add(tce);
+                        throw;
                     }
                 }
                 //TestNodes.ToList().ForEach(tn => tn.FinishTask.Wait());
