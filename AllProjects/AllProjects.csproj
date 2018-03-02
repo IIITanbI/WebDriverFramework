@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4474FC48-0D28-49B4-8E78-8A1C9ACE7492}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AllProjects</RootNamespace>
+    <AssemblyName>AllProjects</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class1.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ReportPortal\agent-net-nunit-master\ReportPortal.NUnitExtension\ReportPortal.NUnitExtension.csproj">
+      <Project>{a512c033-3baa-4435-9d8a-111792761ba9}</Project>
+      <Name>ReportPortal.NUnitExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReportPortal\client-net-master\client-net-master\ReportPortal.Client\ReportPortal.Client.csproj">
+      <Project>{2823c651-f4d9-4734-9fe8-30b523fd3389}</Project>
+      <Name>ReportPortal.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReportPortal\commons-net-master\ReportPortal.Shared\ReportPortal.Shared.csproj">
+      <Project>{8012431a-a374-484c-84f2-faa880bba356}</Project>
+      <Name>ReportPortal.Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReportPortal\logger-net-nlog-master\ReportPortal.NLog\ReportPortal.NLog.csproj">
+      <Project>{70180475-1419-4479-aba5-c910ee5ce3fa}</Project>
+      <Name>ReportPortal.NLog</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

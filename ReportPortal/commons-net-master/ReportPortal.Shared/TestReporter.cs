@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,16 +59,37 @@ namespace ReportPortal.Shared
         public Task FinishTask;
         public void Finish(FinishTestItemRequest request)
         {
+            List<TaskCanceledException> exceptions = new List<TaskCanceledException>();
+
             FinishTask = Task.Run(async () =>
             {
                 StartTask.Wait();
 
                 AdditionalTasks.ToList().ForEach(at => at.Wait());
-
-                TestNodes.ToList().ForEach(tn => tn.FinishTask.Wait());
+               
+                var nodes = TestNodes.ToList();
+                foreach (var tn in nodes)
+                {
+                    try
+                    {
+                        tn.FinishTask.Wait();
+                    }
+                    catch (TaskCanceledException tce)
+                    {
+                        exceptions.Add(tce);
+                    }
+                }
+                //TestNodes.ToList().ForEach(tn => tn.FinishTask.Wait());
 
                 await _service.FinishTestItemAsync(TestId, request);
             });
+
+            lock (Console.Out)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                exceptions.ForEach(e => Console.WriteLine(e.Message));
+                Console.ResetColor();
+            }
         }
 
         public ConcurrentBag<TestReporter> TestNodes = new ConcurrentBag<TestReporter>();

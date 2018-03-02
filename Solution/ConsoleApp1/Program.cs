@@ -15,10 +15,13 @@ using System.Threading.Tasks;
 using System.Web;
 using Newtonsoft.Json.Linq;
 using NLog;
+using NLog.Common;
 using NLog.Targets;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.IE;
 using OpenQA.Selenium.Support.PageObjects;
 using WebDriverFramework;
 using WebDriverFramework.Elements;
@@ -75,6 +78,8 @@ namespace ConsoleApp1
 
         static void Main(string[] args)
         {
+           // var profile = new FirefoxProfile();
+            
             Dictionary<int, int> dict = new Dictionary<int, int>()
             {
                 {1, 2},
