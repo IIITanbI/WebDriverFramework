@@ -59,7 +59,7 @@ namespace ReportPortal.Shared
         public Task FinishTask;
         public void Finish(FinishTestItemRequest request)
         {
-            List<TaskCanceledException> exceptions = new List<TaskCanceledException>();
+            var exceptions = new List<Exception>();
 
             FinishTask = Task.Run(async () =>
             {
@@ -74,12 +74,13 @@ namespace ReportPortal.Shared
                     {
                         tn.FinishTask.Wait();
                     }
-                    catch (TaskCanceledException tce)
+                    catch (Exception tce)
                     {
                         exceptions.Add(tce);
-                        throw;
                     }
                 }
+                 TestNodes.ToList().ForEach(tn => tn.FinishTask.Wait());
+
                 //TestNodes.ToList().ForEach(tn => tn.FinishTask.Wait());
 
                 await _service.FinishTestItemAsync(TestId, request);
@@ -88,7 +89,7 @@ namespace ReportPortal.Shared
             lock (Console.Out)
             {
                 Console.BackgroundColor = ConsoleColor.Red;
-                exceptions.ForEach(e => Console.WriteLine(e.Message));
+                exceptions.ForEach(e => Console.WriteLine(e.ToString()));
                 Console.ResetColor();
             }
         }
