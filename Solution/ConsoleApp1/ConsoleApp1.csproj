@@ -45,10 +45,6 @@
     <Reference Include="nunit.framework, Version=3.9.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\..\packages\NUnit.3.9.0\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="ReportPortal.Client, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Users\Artsiom_Kuis\Downloads\agent-net-nunit-master\agent-net-nunit-master\ReportPortal.NUnitExtension\bin\Debug\net45\ReportPortal.Client.dll</HintPath>
-    </Reference>
     <Reference Include="RestSharp, Version=106.2.1.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
       <HintPath>..\..\packages\RestSharp.106.2.1\lib\net452\RestSharp.dll</HintPath>
     </Reference>
@@ -90,6 +86,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ReportPortal\client-net-master\client-net-master\ReportPortal.Client\ReportPortal.Client.csproj">
+      <Project>{2823c651-f4d9-4734-9fe8-30b523fd3389}</Project>
+      <Name>ReportPortal.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ReportPortal\commons-net-master\ReportPortal.Shared\ReportPortal.Shared.csproj">
+      <Project>{8012431a-a374-484c-84f2-faa880bba356}</Project>
+      <Name>ReportPortal.Shared</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ReportPortal\logger-net-nlog-master\ReportPortal.NLog\ReportPortal.NLog.csproj">
       <Project>{70180475-1419-4479-aba5-c910ee5ce3fa}</Project>
       <Name>ReportPortal.NLog</Name>
@@ -106,12 +110,10 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\Selenium.WebDriver.GeckoDriver.0.19.1\build\Selenium.WebDriver.GeckoDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Selenium.WebDriver.GeckoDriver.0.19.1\build\Selenium.WebDriver.GeckoDriver.targets'))" />
     <Error Condition="!Exists('..\..\packages\Selenium.WebDriver.IEDriver.3.9.0\build\Selenium.WebDriver.IEDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Selenium.WebDriver.IEDriver.3.9.0\build\Selenium.WebDriver.IEDriver.targets'))" />
-    <Error Condition="!Exists('..\..\packages\Selenium.WebDriver.MicrosoftWebDriver.10.0.15063\build\Selenium.WebDriver.MicrosoftWebDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Selenium.WebDriver.MicrosoftWebDriver.10.0.15063\build\Selenium.WebDriver.MicrosoftWebDriver.targets'))" />
     <Error Condition="!Exists('..\..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props'))" />
     <Error Condition="!Exists('..\..\packages\Selenium.WebDriver.ChromeDriver.2.36.0\build\Selenium.WebDriver.ChromeDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Selenium.WebDriver.ChromeDriver.2.36.0\build\Selenium.WebDriver.ChromeDriver.targets'))" />
   </Target>
   <Import Project="..\..\packages\Selenium.WebDriver.GeckoDriver.0.19.1\build\Selenium.WebDriver.GeckoDriver.targets" Condition="Exists('..\..\packages\Selenium.WebDriver.GeckoDriver.0.19.1\build\Selenium.WebDriver.GeckoDriver.targets')" />
   <Import Project="..\..\packages\Selenium.WebDriver.IEDriver.3.9.0\build\Selenium.WebDriver.IEDriver.targets" Condition="Exists('..\..\packages\Selenium.WebDriver.IEDriver.3.9.0\build\Selenium.WebDriver.IEDriver.targets')" />
-  <Import Project="..\..\packages\Selenium.WebDriver.MicrosoftWebDriver.10.0.15063\build\Selenium.WebDriver.MicrosoftWebDriver.targets" Condition="Exists('..\..\packages\Selenium.WebDriver.MicrosoftWebDriver.10.0.15063\build\Selenium.WebDriver.MicrosoftWebDriver.targets')" />
   <Import Project="..\..\packages\Selenium.WebDriver.ChromeDriver.2.36.0\build\Selenium.WebDriver.ChromeDriver.targets" Condition="Exists('..\..\packages\Selenium.WebDriver.ChromeDriver.2.36.0\build\Selenium.WebDriver.ChromeDriver.targets')" />
 </Project>

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -22,7 +23,10 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
+using OpenQA.Selenium.Support.Extensions;
 using OpenQA.Selenium.Support.PageObjects;
+using ReportPortal.Client;
+using ReportPortal.Shared;
 using WebDriverFramework;
 using WebDriverFramework.Elements;
 using WebDriverFramework.Extension;
@@ -76,10 +80,77 @@ namespace ConsoleApp1
         }
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
+        public void button1()
+
+        {
+            var temp = testAsync();
+            Debug.WriteLine("pass");
+            var value = temp.Result; //Blocking forever....
+        }
+
+        private async Task<bool> testAsync()
+        {
+            return await Task.Run(() =>
+            {
+                Debug.WriteLine("start wait one");
+                Debug.WriteLine("reset");
+                return true; //Code goes here without any error.....
+            });
+        }
+
         static void Main(string[] args)
         {
-           // var profile = new FirefoxProfile();
-            
+
+            Bridge.Service = new Service(new Uri("http://localhost:8080/api/v1/"), "myproject", "7a580212-5f06-4f46-8cc3-3f78cc4aa282");
+            Bridge.Service = new Service(new Uri("https://rp.epam.com/api/v1/"), "ARTSIOM_KUIS_PERSONAL", "591b2176-229c-4d3e-aca8-bbd02e9e5e55");
+            //591b2176-229c-4d3e-aca8-bbd02e9e5e55
+            var launch = Bridge.Service.StartLaunchAsync(new ReportPortal.Client.Requests.StartLaunchRequest()
+            {
+                Name = "new launch",
+                Description = "asd",
+                StartTime = DateTime.Now,
+            }).Result;
+
+
+            var test = Bridge.Service.StartTestItemAsync(new ReportPortal.Client.Requests.StartTestItemRequest()
+            {
+                LaunchId = launch.Id,
+                Name = "testItem",
+                Description = "sadsad",
+                StartTime = DateTime.Now,
+            }).Result;
+
+            var tasks = new List<Task>();
+            for (int i = 0; i < 1e5; i++)
+            {
+                tasks.Add(new Task(async () =>
+                {
+                    await Bridge.Service.AddLogItemAsync(new ReportPortal.Client.Requests.AddLogItemRequest()
+                    {
+                        TestItemId = test.Id,
+                        Level = ReportPortal.Client.Models.LogLevel.Info,
+                        Text = "sadkdsasalkjd",
+                        Time = DateTime.Now
+                    });
+                }));
+            }
+            tasks.ForEach(t => t.Start());
+            Task.WaitAll(tasks.ToArray());
+
+            Bridge.Service.FinishTestItemAsync(test.Id, new ReportPortal.Client.Requests.FinishTestItemRequest()
+            {
+                EndTime = DateTime.Now,
+                Status = ReportPortal.Client.Models.Status.Passed
+            }).Wait();
+
+            Bridge.Service.FinishLaunchAsync(launch.Id, new ReportPortal.Client.Requests.FinishLaunchRequest()
+            {
+                EndTime = DateTime.Now
+            }).Wait();
+
+            Console.WriteLine("END!!!!");
+            Console.ReadLine();
+            // var profile = new FirefoxProfile();
             Dictionary<int, int> dict = new Dictionary<int, int>()
             {
                 {1, 2},
@@ -95,7 +166,6 @@ namespace ConsoleApp1
 
             var all = dict.Keys.Concat(dict.Values).Distinct().ToList();
             var graph = new Graph<int>(dict, all);
-            var rssesult = graph.BuildQueue();
             //IWebDriver _driver = new FirefoxDriver(new FirefoxOptions(){BrowserExecutableLocation = "C:\\Program Files\\Mozilla Firefox\\firefox.exe" });
             //IWebDriver _driver = new InternetExplorerDriver(new InternetExplorerOptions()
             //{
@@ -104,15 +174,16 @@ namespace ConsoleApp1
             //});
             //WebElement.DefaultElementSearchTimeout = 60;
 
-            var map = typeof(WebDriver).GetInterfaceMap(typeof(IWebDriver));
             var opt = new ChromeOptions();
             opt.AddArgument("disable-infobars");
 
             var _driver = new ChromeDriver(opt);
             var driver = new WebDriver(_driver);
 
-            driver.WrappedDriver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
-            // driver.Navigate().GoToUrl("https://onliner.by");
+            //driver.WrappedDriver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test.html");
+            driver.WrappedDriver.Navigate().GoToUrl("https://onliner.by");
+            var rssesult = driver.WrappedDriver.ExecuteJavaScript<string>("return window.localStorage");
+            var rssessult = driver.WrappedDriver.ExecuteJavaScript<string>("window.localStorage.setItem('key', 'value')");
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
             var label = new CheckBox(By.XPath("asdsad"), null, driver.WrappedDriver).WaitUntil(ch => ch.Selected);
             var checkbox = new LabelElement(By.XPath("asdsad"), null, driver.WrappedDriver);
@@ -135,25 +206,25 @@ namespace ConsoleApp1
             Console.WriteLine(p2.IsCached);
             Console.WriteLine();
 
-            var elements = driver.Get("/*").FindAll();
-            var zzzxczx = elements.Count;
-            var test = (elements).LocateAll();
-            var test1 = elements.ToList();
-            var rrrrr = pr.element1.Get(".").Locate();
+            //var elements = driver.Get("/*").FindAll();
+            //var zzzxczx = elements.Count;
+            //var test = (elements).LocateAll();
+            //var test1 = elements.ToList();
+            //var rrrrr = pr.element1.Get(".").Locate();
 
-            var el = driver.Get<CheckBox>("//some").WaitUntil(Condition.Exist);
-            var el1 = driver.Get("//some").WaitUntil(Condition.Exist);
+            //var el = driver.Get<CheckBox>("//some").WaitUntil(Condition.Exist);
+            //var el1 = driver.Get("//some").WaitUntil(Condition.Exist);
 
 
 
-            var elem = pr.element1.Get("asd").WaitUntil(Condition.Exist, 10).Get(".//test").Text;
-            var result = pr.element1.Get(".//test").Locate();
-            var ggg = pr.element1.Displayed;
-            pr.element1 = new LabelElement(By.XPath("//div[@class='test']"), null, driver.WrappedDriver);
-            var vis = pr.element2.Text;
-            var vis3 = pr.element3.Text;
-            var vis4 = pr.element4.ToList();
-            driver.WrappedDriver.Quit();
+            //var elem = pr.element1.Get("asd").WaitUntil(Condition.Exist, 10).Get(".//test").Text;
+            //var result = pr.element1.Get(".//test").Locate();
+            //var ggg = pr.element1.Displayed;
+            //pr.element1 = new LabelElement(By.XPath("//div[@class='test']"), null, driver.WrappedDriver);
+            //var vis = pr.element2.Text;
+            //var vis3 = pr.element3.Text;
+            //var vis4 = pr.element4.ToList();
+            //driver.WrappedDriver.Quit();
         }
 
         public Program()

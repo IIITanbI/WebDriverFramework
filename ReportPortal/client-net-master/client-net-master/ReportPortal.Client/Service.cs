@@ -49,7 +49,7 @@ namespace ReportPortal.Client
             try
             {
                 IMethodCallMessage methodCallMessage = msg as IMethodCallMessage;
-                Console.WriteLine(methodCallMessage.MethodName);
+                //Console.WriteLine(methodCallMessage.MethodName);
                 return InvokeMethod(client, methodCallMessage);
             }
             catch (Exception ex)
@@ -81,7 +81,7 @@ namespace ReportPortal.Client
     /// </summary>
     public partial class Service
     {
-        private readonly IMyClient _httpClient;
+        private readonly HttpClient _httpClient;
         private readonly HttpClientHandler _httpHandler;
 
         /// <summary>
@@ -94,8 +94,10 @@ namespace ReportPortal.Client
         {
             _httpHandler = new HttpClientHandler();
 
-            _httpClient = (IMyClient)(new DriverObjectProxy(_httpHandler).GetTransparentProxy());
+            //_httpClient = (IMyClient)(new DriverObjectProxy(_httpHandler).GetTransparentProxy());
+            _httpClient = new HttpClient(_httpHandler);
             _httpClient.BaseAddress = uri;
+            //_httpClient.Timeout = TimeSpan.FromMinutes(10);
 
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

@@ -6,6 +6,7 @@ using ReportPortal.Client.Requests;
 using System.Threading.Tasks;
 using ReportPortal.Client.Converters;
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using ReportPortal.Client.Extentions;
 
@@ -21,7 +22,7 @@ namespace ReportPortal.Client
         public async Task<LogItemsContainer> GetLogItemsAsync(FilterOption filterOption = null)
         {
             var uri = BaseUri.Append($"{Project}/log");
-            
+
             if (filterOption != null)
             {
                 uri = uri.Append($"?{filterOption}");
@@ -67,10 +68,24 @@ namespace ReportPortal.Client
         {
             var uri = BaseUri.Append($"{Project}/log");
 
+
             if (model.Attach == null)
             {
                 var body = ModelSerializer.Serialize<AddLogItemRequest>(model);
-                var response = await _httpClient.PostAsync(uri, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
+                HttpResponseMessage response;
+                var s = Stopwatch.StartNew();
+                try
+                {
+                    response = await _httpClient.PostAsync(uri, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                   //var z=   System.Threading.Timeout.InfiniteTimeSpan;
+                    s.Stop();
+                    Console.WriteLine(e);
+                    throw;
+                }
+
                 response.VerifySuccessStatusCode();
                 return ModelSerializer.Deserialize<LogItem>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
             }
