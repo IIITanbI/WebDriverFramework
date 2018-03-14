@@ -27,20 +27,7 @@
             this.Driver = parent != null ? parent.Driver : driver;
 
             this._webElementProxy = new WebElementProxy(new[] { locator }, this.GetParentElementLocator());
-            this._webElementProxy.BeforeSearching += (o, e) => FrameSwitcherBase(this.AllParents);
-        }
-
-        private void FrameSwitcherBase(IEnumerable<WebElement> elements)
-        {
-            var parentFrame = elements.LastOrDefault(p => p is IFrameElement);
-            if (parentFrame == null)
-            {
-                this.Driver.Driver.SwitchTo().DefaultContent();
-            }
-            else
-            {
-                this.Driver.Driver.SwitchTo().Frame(parentFrame.Element);
-            }
+            this._webElementProxy.BeforeSearching += (o, e) => SwitchFrames(this.AllParents);
         }
 
         public WebDriver Driver { get; }
@@ -112,7 +99,7 @@
         public IEnumerable<T> GetAll<T>(By locator)
         {
             var proxy = new WebElementListProxy(new[] { locator }, this.GetElementLocator(), false);
-            proxy.BeforeSearching += (o, e) => FrameSwitcherBase(this.AllParents.Concat(new[] { this }));
+            proxy.BeforeSearching += (o, e) => SwitchFrames(this.AllParents.Concat(new[] { this }));
 
             return proxy.Elements.Select(e => ElementFactory.Create<T>(e, this.Driver));
         }
@@ -146,6 +133,18 @@
             }
 
             return element;
+        }
+        protected void SwitchFrames(IEnumerable<WebElement> elements)
+        {
+            var parentFrame = elements.LastOrDefault(p => p is IFrameElement);
+            if (parentFrame == null)
+            {
+                this.Driver.Driver.SwitchTo().DefaultContent();
+            }
+            else
+            {
+                this.Driver.Driver.SwitchTo().Frame(parentFrame.Element);
+            }
         }
     }
 }
