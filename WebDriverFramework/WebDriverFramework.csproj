@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Condition.cs" />
+    <Compile Include="IGetElements.cs" />
     <Compile Include="WebDriverSearchContext.cs" />
     <Compile Include="Elements\Elements.cs" />
     <Compile Include="ElementFactory.cs" />
