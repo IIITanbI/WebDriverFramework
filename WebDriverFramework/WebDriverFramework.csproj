@@ -67,6 +67,7 @@
     <Compile Include="PageFactory\Attributes\ByXPathAttribute.cs" />
     <Compile Include="PageFactory\Attributes\RelateToAttribute.cs" />
     <Compile Include="Proxy\DriverObjectProxy.cs" />
+    <Compile Include="Proxy\ICacheable.cs" />
     <Compile Include="Proxy\WebElementListProxy.cs" />
     <Compile Include="Proxy\WebElementProxy.cs" />
     <Compile Include="WebDriver.cs" />

@@ -9,11 +9,11 @@
 
     public class WebElementListProxy : DriverObjectProxy
     {
-        private List<IWebElement> cachedElements;
+        private List<IWebElement> _cachedElements;
 
         public WebElementListProxy(List<IWebElement> elements) : this(null, null, false)
         {
-            this.cachedElements = elements;
+            this._cachedElements = elements;
         }
         public WebElementListProxy(IEnumerable<By> bys, IElementLocator locator, bool shouldCached = false)
             : this(typeof(IList<IWebElement>), locator, bys, shouldCached)
@@ -31,23 +31,21 @@
         {
             get
             {
-                if (this.cachedElements != null)
+                if (this._cachedElements != null)
                 {
-                    return this.cachedElements.ToList();
+                    return this._cachedElements.ToList();
                 }
 
-                this.FrameSwitcher?.Invoke();
+                this.OnBeforeSearching();
                 var elements = this.Locator.LocateElements(this.Bys).ToList();
                 if (this.ShouldCached)
                 {
-                    this.cachedElements = elements;
+                    this._cachedElements = elements;
                 }
 
                 return elements;
             }
         }
-
-        public Action FrameSwitcher { get; set; }
 
         /// <summary>
         /// Invokes the method that is specified in the provided <see cref="IMessage"/> on the

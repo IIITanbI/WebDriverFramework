@@ -25,10 +25,9 @@
         {
             this._parent = parent;
             this.Driver = parent != null ? parent.Driver : driver;
-            this._webElementProxy = new WebElementProxy(new[] { locator }, GetParentElementLocator())
-            {
-                FrameSwitcher = () => FrameSwitcherBase(this.AllParents)
-            };
+
+            this._webElementProxy = new WebElementProxy(new[] { locator }, this.GetParentElementLocator());
+            this._webElementProxy.BeforeSearching += (o, e) => FrameSwitcherBase(this.AllParents);
         }
 
         private void FrameSwitcherBase(IEnumerable<WebElement> elements)
@@ -109,13 +108,13 @@
             this.Element.Click();
         }
 
-        public virtual T Get<T>(By locator) => ElementFactory.Create<T>(locator, this, null);
-        public virtual IEnumerable<T> GetAll<T>(By locator)
+        public T Get<T>(By locator) => ElementFactory.Create<T>(locator, this, null);
+        public IEnumerable<T> GetAll<T>(By locator)
         {
-            return new WebElementListProxy(new[] { locator }, this.GetElementLocator(), false)
-                {
-                    FrameSwitcher = () => FrameSwitcherBase(this.AllParents.Concat(new[] { this }))
-                }.Elements.Select(e => ElementFactory.Create<T>(e, this.Driver));
+            var proxy = new WebElementListProxy(new[] { locator }, this.GetElementLocator(), false);
+            proxy.BeforeSearching += (o, e) => FrameSwitcherBase(this.AllParents.Concat(new[] { this }));
+
+            return proxy.Elements.Select(e => ElementFactory.Create<T>(e, this.Driver));
         }
 
         protected void StubAction()

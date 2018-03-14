@@ -9,10 +9,6 @@
     using System.Reflection;
     using System.Runtime.Remoting;
     using System.Runtime.Remoting.Messaging;
-    internal interface ICacheable
-    {
-        bool IsCached { get; }
-    }
 
     public class WebElementProxy : DriverObjectProxy, IRemotingTypeInfo, ICacheable, IWrapsElement
     {
@@ -23,11 +19,11 @@
             typeof(IWrapsElement)
         };
 
-        private IWebElement cachedElement;
+        private IWebElement _cachedElement;
 
         public WebElementProxy(IWebElement element) : this(typeof(IWebElement), null, null, true)
         {
-            this.cachedElement = element;
+            this._cachedElement = element;
         }
         public WebElementProxy(IEnumerable<By> bys, IElementLocator locator, bool shouldCached = false)
             : this(typeof(IWebElement), locator, bys, shouldCached)
@@ -38,34 +34,31 @@
         {
         }
 
-        public bool IsCached => (cachedElement as ICacheable)?.IsCached ?? cachedElement is RemoteWebElement;
+        public bool IsCached => (_cachedElement as ICacheable)?.IsCached ?? _cachedElement is RemoteWebElement;
         public IWebElement WrappedElement
         {
             get
             {
-                if (this.cachedElement != null)
+                if (this._cachedElement != null)
                 {
-                    return this.cachedElement;
+                    return this._cachedElement;
                 }
 
-                this.FrameSwitcher?.Invoke();
+                this.OnBeforeSearching();
                 var element = this.Locator.LocateElement(this.Bys);
                 if (this.ShouldCached)
                 {
-                    this.cachedElement = element;
+                    this._cachedElement = element;
                 }
 
                 return element;
             }
         }
 
-        public Action FrameSwitcher { get; set; }
-
         public override IMessage Invoke(IMessage msg)
         {
-            IMethodCallMessage methodCallMessage = msg as IMethodCallMessage;
-
-            var declaringType = (methodCallMessage.MethodBase as MethodInfo).DeclaringType;
+            var methodCallMessage = (IMethodCallMessage)msg;
+            var declaringType = ((MethodInfo)methodCallMessage.MethodBase).DeclaringType;
 
             var element = this.WrappedElement;
             if (typeof(IWrapsElement).IsAssignableFrom(declaringType))

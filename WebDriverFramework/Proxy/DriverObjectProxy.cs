@@ -28,6 +28,8 @@
             this.ShouldCached = shouldCached;
         }
 
+        public event EventHandler BeforeSearching;
+
         /// <summary>
         /// Gets the <see cref="IElementLocator"/> implementation that determines how elements are located.
         /// </summary>
@@ -59,6 +61,11 @@
 
             MethodInfo proxiedMethod = msg.MethodBase as MethodInfo;
             return new ReturnMessage(proxiedMethod.Invoke(representedValue, msg.Args), null, 0, msg.LogicalCallContext, msg);
+        }
+
+        protected virtual void OnBeforeSearching()
+        {
+            BeforeSearching?.Invoke(this, EventArgs.Empty);
         }
     }
 }
