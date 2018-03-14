@@ -60,8 +60,4 @@
             this.Driver.Quit();
         }
     }
-
-    public interface ILogger
-    {
-    }
 }

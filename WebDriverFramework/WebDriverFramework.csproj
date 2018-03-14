@@ -61,6 +61,7 @@
     <Compile Include="Extension\FindExtension.cs" />
     <Compile Include="Elements\WebElement.cs" />
     <Compile Include="Extension\WebElementExtension.cs" />
+    <Compile Include="ILogger.cs" />
     <Compile Include="PageFactory\Attributes\ByClassNameAttribute.cs" />
     <Compile Include="PageFactory\Attributes\ByIdAttribute.cs" />
     <Compile Include="PageFactory\Attributes\ByXPathAttribute.cs" />
