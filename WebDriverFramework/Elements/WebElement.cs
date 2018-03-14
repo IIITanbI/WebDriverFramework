@@ -1,9 +1,7 @@
 ﻿namespace WebDriverFramework.Elements
 {
-    using Extension;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Internal;
-    using OpenQA.Selenium.Support.Extensions;
     using OpenQA.Selenium.Support.PageObjects;
     using Proxy;
     using System;
@@ -11,86 +9,67 @@
     using System.Drawing;
     using System.Linq;
 
-    public interface IBaseWebElement
+    public abstract partial class WebElement : IFindElement
     {
-        IWebDriver WrappedDriver { get; }
-        IWebElement ProxyElement { get; }
-        IWebElement Element { get; }
-        By Locator { get; }
-    }
-    public interface ILocate<out T>
-    {
-        T Locate();
-    }
-    public interface IFindElement<T> where T : ILocate<T>
-    {
-        T Find(string xpath);
-        T Find(By locator);
-        IList<T> FindAll(string xpath = ".//*");
-        IList<T> FindAll(By locator);
-        T Get(string xpath);
-        T Get(By locator);
-        IEnumerable<T> GetAll(string xpath);
-        IEnumerable<T> GetAll(By locator);
-    }
-    public interface IFindElement
-    {
-        T Find<T>(string xpath) where T : ILocate<T>;
-        T Find<T>(By locator) where T : ILocate<T>;
-        IList<T> FindAll<T>(string xpath = ".//*") where T : ILocate<T>;
-        IList<T> FindAll<T>(By locator) where T : ILocate<T>;
-        T Get<T>(string xpath);
-        T Get<T>(By locator);
-        IEnumerable<T> GetAll<T>(string xpath);
-        IEnumerable<T> GetAll<T>(By locator);
-    }
+        private WebElement _parent;
+        private readonly WebElementProxy _webElementProxy;
 
-    public abstract partial class WebElement : IBaseWebElement, IFindElement, IFindElement<LabelElement>
-    {
         public static double DefaultWaitTimeout { get; set; } = 60;
 
-        private IBaseWebElement _parent;
-
-        protected WebElement(IWebElement implicitElement, IWebDriver driver)
+        protected WebElement(IWebElement implicitElement, WebDriver driver)
         {
-            this.WrappedDriver = driver;
-            this.WebElementProxy = new WebElementProxy(implicitElement);
+            this.Driver = driver;
+            this._webElementProxy = new WebElementProxy(implicitElement);
         }
-        protected WebElement(By locator, WebElement parent, IWebDriver driver = null)
+        protected WebElement(By locator, WebElement parent, WebDriver driver = null)
         {
-            this.WebElementProxy = new WebElementProxy(new[] { locator }, null);
-            this.WrappedDriver = driver;
-            this.Parent = parent;
+            this._parent = parent;
+            this.Driver = parent != null ? parent.Driver : driver;
+            this._webElementProxy = new WebElementProxy(new[] { locator }, GetParentElementLocator())
+            {
+                FrameSwitcher = () => FrameSwitcherBase(this.AllParents)
+            };
         }
 
-        //public WebElement(By locator, WebElement parent, IWebElement implicitElement = null, IWebDriver driver = null)
-        //{
-        //    this.WrappedDriver = driver;
-
-        //    if (implicitElement != null)
-        //    {
-        //        this.WebElementProxy = new WebElementProxy(implicitElement);
-        //    }
-        //    else
-        //    {
-        //        this.WebElementProxy = new WebElementProxy(new[] { locator }, null);
-        //        this.Parent = parent;
-        //    }
-        //}
-
-        protected WebElementProxy WebElementProxy { get; }
-        public IWebDriver WrappedDriver { get; }
-        public IWebElement ProxyElement => (IWebElement)this.WebElementProxy.GetTransparentProxy();
-        public IWebElement Element => this.UnwrapProxy();
-
-        public By Locator => this.WebElementProxy.Bys.FirstOrDefault();
-        public IBaseWebElement Parent
+        private void FrameSwitcherBase(IEnumerable<WebElement> elements)
         {
-            get => _parent;
+            var parentFrame = elements.LastOrDefault(p => p is IFrameElement);
+            if (parentFrame == null)
+            {
+                this.Driver.Driver.SwitchTo().DefaultContent();
+            }
+            else
+            {
+                this.Driver.Driver.SwitchTo().Frame(parentFrame.Element);
+            }
+        }
+
+        public WebDriver Driver { get; }
+        public IWebElement ProxyElement => (IWebElement)this._webElementProxy.GetTransparentProxy();
+        public virtual IWebElement Element => this.UnwrapProxy();
+
+        protected IList<WebElement> AllParents
+        {
+            get
+            {
+                var parents = this.Parent?.AllParents;
+                parents?.Add(this.Parent);
+                return parents ?? new List<WebElement>();
+            }
+        }
+        public By Locator => this._webElementProxy.Bys.FirstOrDefault();
+        public WebElement Parent
+        {
+            get => this._parent;
             set
             {
-                _parent = value;
-                this.WebElementProxy.Locator = this.GetParentElementLocator();
+                if (this._webElementProxy.IsCached)
+                {
+                    throw new Exception("Already cached. Do not need to change parent");
+                }
+
+                this._parent = value;
+                this._webElementProxy.Locator = GetParentElementLocator();
             }
         }
 
@@ -130,68 +109,44 @@
             this.Element.Click();
         }
 
-        #region Find elements
-        public T Find<T>(string xpath) where T : ILocate<T> => Find<T>(By.XPath(xpath));
-        public T Find<T>(By locator) where T : ILocate<T> => ElementFactory.Create<T>(locator, this).Locate();
-        public IList<T> FindAll<T>(string xpath = ".//*") where T : ILocate<T> => FindAll<T>(By.XPath(xpath));
-        public IList<T> FindAll<T>(By locator) where T : ILocate<T> => GetAll<T>(locator).LocateAll().ToList();
-
-        public T Get<T>(string xpath) => Get<T>(By.XPath(xpath));
-        public T Get<T>(By locator) => ElementFactory.Create<T>(locator, this);
-        public IEnumerable<T> GetAll<T>(string xpath) => GetAll<T>(By.XPath(xpath));
-        public IEnumerable<T> GetAll<T>(By locator) => this.WrappedDriver.FindElements(locator).Select(e => ElementFactory.Create<T>(e, this.WrappedDriver));
-
-        public LabelElement Find(string xpath) => Find<LabelElement>(xpath);
-        public LabelElement Find(By locator) => Find<LabelElement>(locator);
-        public IList<LabelElement> FindAll(string xpath = ".//*") => FindAll<LabelElement>(xpath);
-        public IList<LabelElement> FindAll(By locator) => FindAll<LabelElement>(locator);
-
-        public LabelElement Get(string xpath) => Get<LabelElement>(xpath);
-        public LabelElement Get(By locator) => Get<LabelElement>(locator);
-        public IEnumerable<LabelElement> GetAll(string xpath) => GetAll<LabelElement>(xpath);
-        public IEnumerable<LabelElement> GetAll(By locator) => GetAll<LabelElement>(locator); 
-        #endregion
-
-        protected IElementLocator GetParentElementLocator()
+        public virtual T Get<T>(By locator) => ElementFactory.Create<T>(locator, this, null);
+        public virtual IEnumerable<T> GetAll<T>(By locator)
         {
-            return new DefaultElementLocator(this.Parent != null ? this.Parent.ProxyElement : (ISearchContext)this.WrappedDriver);
+            return new WebElementListProxy(new[] { locator }, this.GetElementLocator(), false)
+                {
+                    FrameSwitcher = () => FrameSwitcherBase(this.AllParents.Concat(new[] { this }))
+                }.Elements.Select(e => ElementFactory.Create<T>(e, this.Driver));
         }
+
         protected void StubAction()
         {
-            //just stub acition
+            //just stub action
             if (this.TagName == null)
             {
                 throw new NotImplementedException();
             }
         }
-
-        private IWebElement UnwrapProxy()
+        protected IElementLocator GetParentElementLocator()
         {
-            IWebElement element = this.ProxyElement;
+            ISearchContext context = this.Driver.Driver;
+            if (this.Parent != null && !(this.Parent is IFrameElement))
+            {
+                context = this.Parent.ProxyElement;
+            }
+
+            return new DefaultElementLocator(context);
+        }
+        protected IElementLocator GetElementLocator() => new DefaultElementLocator(this.ProxyElement);
+
+        protected IWebElement UnwrapProxy()
+        {
+            var element = this.ProxyElement;
             while (element is IWrapsElement wrap)
             {
                 element = wrap.WrappedElement;
             }
 
             return element;
-        }
-    }
-
-    public abstract partial class WebElement
-    {
-        public string JsText => this.WrappedDriver.ExecuteJavaScript<string>("arguments[0].text", this.Element);
-
-        public void JSClick()
-        {
-            this.WrappedDriver.ExecuteJavaScript("arguments[0].click()", this.Element);
-        }
-        public void JSScrollIntoView()
-        {
-            this.WrappedDriver.ExecuteJavaScript("arguments[0].scrollIntoView(true)", this.Element);
-        }
-        public void JSScrollTo()
-        {
-            this.WrappedDriver.ExecuteJavaScript($"window.scrollTo({this.Element.Location.X}, {this.Element.Location.Y})", this.Element);
         }
     }
 }

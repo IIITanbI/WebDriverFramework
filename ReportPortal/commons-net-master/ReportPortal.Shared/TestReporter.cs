@@ -59,39 +59,16 @@ namespace ReportPortal.Shared
         public Task FinishTask;
         public void Finish(FinishTestItemRequest request)
         {
-            var exceptions = new List<Exception>();
-
             FinishTask = Task.Run(async () =>
             {
                 StartTask.Wait();
 
                 AdditionalTasks.ToList().ForEach(at => at.Wait());
-               
-                var nodes = TestNodes.ToList();
-                foreach (var tn in nodes)
-                {
-                    try
-                    {
-                        tn.FinishTask.Wait();
-                    }
-                    catch (Exception tce)
-                    {
-                        exceptions.Add(tce);
-                    }
-                }
-                 TestNodes.ToList().ForEach(tn => tn.FinishTask.Wait());
 
-                //TestNodes.ToList().ForEach(tn => tn.FinishTask.Wait());
+                TestNodes.ToList().ForEach(tn => tn.FinishTask.Wait());
 
                 await _service.FinishTestItemAsync(TestId, request);
             });
-
-            lock (Console.Out)
-            {
-                Console.BackgroundColor = ConsoleColor.Red;
-                exceptions.ForEach(e => Console.WriteLine(e.ToString()));
-                Console.ResetColor();
-            }
         }
 
         public ConcurrentBag<TestReporter> TestNodes = new ConcurrentBag<TestReporter>();

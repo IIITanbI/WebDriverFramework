@@ -16,6 +16,13 @@
         private readonly Dictionary<MemberInfo, object> _membersDictionary = new Dictionary<MemberInfo, object>();
         private readonly Dictionary<MemberInfo, DriverObjectProxy> _proxyDictionary = new Dictionary<MemberInfo, DriverObjectProxy>();
 
+        private WebDriver _driver { get; }
+
+        public CustomPageObjectMemberDecorator(WebDriver driver)
+        {
+            this._driver = driver;
+        }
+
         public object Decorate(MemberInfo member, IElementLocator locator)
         {
             if (!(member is FieldInfo) && (member as PropertyInfo)?.CanWrite != true)
@@ -29,7 +36,6 @@
                 return null;
             }
 
-            var driver = (IWebDriver)locator.SearchContext;
             Type targetType = GetTargetType(member);
             bool cache = DefaultPageObjectMemberDecoratorProxy.ShouldCacheLookup(member);
             object result;
@@ -37,7 +43,7 @@
             DriverObjectProxy proxyElement = null;
             if (typeof(WebElement).IsAssignableFrom(targetType))
             {
-                result = ElementFactory.Create(targetType, bys.First(), null, driver);
+                result = ElementFactory.Create(targetType, bys.First(), null, this._driver);
             }
             else if (targetType == typeof(IWebElement))
             {

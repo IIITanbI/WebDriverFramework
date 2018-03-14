@@ -1,43 +1,67 @@
 ﻿namespace WebDriverFramework
 {
     using Elements;
-    using Extension;
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Support.Extensions;
+    using OpenQA.Selenium.Support.PageObjects;
+    using OpenQA.Selenium.Support.UI;
+    using Proxy;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
-    public class WebDriver
+    public class WebDriver : IFindElement
     {
         public WebDriver(IWebDriver driver)
         {
-            this.WrappedDriver = driver;
+            this.Driver = driver;
         }
 
-        public IWebDriver WrappedDriver { get; }
+        public IWebDriver Driver { get; }
 
-        public T Find<T>(string xpath) where T : ILocate<T> => Find<T>(By.XPath(xpath));
-        public T Find<T>(By locator) where T : ILocate<T> => ElementFactory.Create<T>(locator, null, this.WrappedDriver).Locate();
-        public IList<T> FindAll<T>(string xpath = ".//*") where T : ILocate<T> => FindAll<T>(By.XPath(xpath));
-        public IList<T> FindAll<T>(By locator) where T : ILocate<T> => GetAll<T>(locator).LocateAll().ToList();
+        public T Get<T>(By locator) => ElementFactory.Create<T>(locator, null, this);
+        public IEnumerable<T> GetAll<T>(By locator)
+        {
+            return new WebElementListProxy(new[] { locator }, new DefaultElementLocator(this.Driver), false)
+                .Elements.Select(e => ElementFactory.Create<T>(e, this));
+        }
 
-        public T Get<T>(string xpath) => Get<T>(By.XPath(xpath));
-        public T Get<T>(By locator) => ElementFactory.Create<T>(locator, null, this.WrappedDriver);
-        public IEnumerable<T> GetAll<T>(string xpath) => GetAll<T>(By.XPath(xpath));
-        public IEnumerable<T> GetAll<T>(By locator) => this.WrappedDriver.FindElements(locator).Select(e => ElementFactory.Create<T>(e, this.WrappedDriver));
+        public WebDriverWait GetWait(double timeout, params Type[] exceptionTypes)
+        {
+            var wait = new WebDriverWait(this.Driver, TimeSpan.FromSeconds(timeout));
+            wait.IgnoreExceptionTypes(exceptionTypes);
+            return wait;
+        }
+        public T Wait<T>(Func<WebDriver, T> condition, double timeout, params Type[] exceptionTypes)
+        {
+            return this.GetWait(timeout, exceptionTypes).Until(d => condition(this));
+        }
 
-        public LabelElement Find(string xpath) => Find<LabelElement>(xpath);
-        public LabelElement Find(By locator) => Find<LabelElement>(locator);
-        public IList<LabelElement> FindAll(string xpath = ".//*") => FindAll<LabelElement>(xpath);
-        public IList<LabelElement> FindAll(By locator) => FindAll<LabelElement>(locator);
+        public void ExecuteJavaScript(string script, WebElement element, ILogger log = null)
+        {
+            this.ExecuteJavaScript<object>(script, element, log);
+        }
+        public T ExecuteJavaScript<T>(string script, WebElement element, ILogger log = null)
+        {
+            return this.ExecuteJavaScript<T>(script, new object[] { element.Element }, log);
+        }
 
-        public LabelElement Get(string xpath) => Get<LabelElement>(xpath);
-        public LabelElement Get(By locator) => Get<LabelElement>(locator);
-        public IEnumerable<LabelElement> GetAll(string xpath) => GetAll<LabelElement>(xpath);
-        public IEnumerable<LabelElement> GetAll(By locator) => GetAll<LabelElement>(locator);
+        public void ExecuteJavaScript(string script, object[] args, ILogger log = null)
+        {
+            this.ExecuteJavaScript<object>(script, args, log);
+        }
+        public T ExecuteJavaScript<T>(string script, object[] args, ILogger log = null)
+        {
+            return this.Driver.ExecuteJavaScript<T>(script, args);
+        }
 
         public void Quit()
         {
-            this.WrappedDriver.Quit();
+            this.Driver.Quit();
         }
+    }
+
+    public interface ILogger
+    {
     }
 }

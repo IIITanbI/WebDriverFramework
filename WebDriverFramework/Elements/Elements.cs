@@ -4,26 +4,38 @@
     using System.Threading;
     using System.Windows.Forms;
 
-    public class LabelElement : WebElement, ILocate<LabelElement>
+    public class FrameElement : WebElement, IFrameElement, ILocate<FrameElement>
     {
-        public LabelElement(IWebElement implicitElement, IWebDriver driver) : base(implicitElement, driver)
+        public FrameElement(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
         {
         }
-        public LabelElement(By locator, WebElement parent, IWebDriver driver = null) : base(locator, parent, driver)
+        public FrameElement(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
+        {
+        }
+
+        public FrameElement Locate() => new FrameElement(this.Element, this.Driver);
+    }
+
+    public class LabelElement : WebElement, ILocate<LabelElement>
+    {
+        public LabelElement(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
+        {
+        }
+        public LabelElement(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
         {
         }
 
         public string Text => Element.Text;
 
-        public LabelElement Locate() => new LabelElement(this.Element, this.WrappedDriver);
+        public LabelElement Locate() => new LabelElement(this.Element, this.Driver);
     }
 
     public abstract class InputWebElement : WebElement
     {
-        protected InputWebElement(IWebElement implicitElement, IWebDriver driver) : base(implicitElement, driver)
+        protected InputWebElement(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
         {
         }
-        protected InputWebElement(By locator, WebElement parent, IWebDriver driver = null) : base(locator, parent, driver)
+        protected InputWebElement(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
         {
         }
 
@@ -37,10 +49,10 @@
         /// </summary>
         private static readonly object Lock = new object();
 
-        public TextWebElement(IWebElement implicitElement, IWebDriver driver) : base(implicitElement, driver)
+        public TextWebElement(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
         {
         }
-        public TextWebElement(By locator, WebElement parent, IWebDriver driver = null) : base(locator, parent, driver)
+        public TextWebElement(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
         {
         }
 
@@ -110,19 +122,19 @@
             this.SendByChars(text);
         }
 
-        public TextWebElement Locate() => new TextWebElement(this.Element, this.WrappedDriver);
+        public TextWebElement Locate() => new TextWebElement(this.Element, this.Driver);
     }
 
     public class CheckBox : InputWebElement, ILocate<CheckBox>
     {
-        public CheckBox(IWebElement implicitElement, IWebDriver driver) : base(implicitElement, driver)
+        public CheckBox(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
         {
         }
-        public CheckBox(By locator, WebElement parent, IWebDriver driver = null) : base(locator, parent, driver)
+        public CheckBox(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
         {
         }
 
         public bool Selected => Element.Selected;
-        public CheckBox Locate() => new CheckBox(this.Element, this.WrappedDriver);
+        public CheckBox Locate() => new CheckBox(this.Element, this.Driver);
     }
 }

@@ -7,9 +7,6 @@
     using System.Linq;
     using System.Runtime.Remoting.Messaging;
 
-    /// <summary>
-    /// Represents a proxy class for a list of elements to be used with the PageFactory.
-    /// </summary>
     public class WebElementListProxy : DriverObjectProxy
     {
         private List<IWebElement> cachedElements;
@@ -18,8 +15,8 @@
         {
             this.cachedElements = elements;
         }
-        public WebElementListProxy(IEnumerable<By> bys, ISearchContext context, bool shouldCached = false)
-            : this(typeof(IList<IWebElement>), new DefaultElementLocator(context), bys, shouldCached)
+        public WebElementListProxy(IEnumerable<By> bys, IElementLocator locator, bool shouldCached = false)
+            : this(typeof(IList<IWebElement>), locator, bys, shouldCached)
         {
         }
         public WebElementListProxy(Type typeToBeProxied, IElementLocator locator, IEnumerable<By> bys, bool shouldCached)
@@ -39,6 +36,7 @@
                     return this.cachedElements.ToList();
                 }
 
+                this.FrameSwitcher?.Invoke();
                 var elements = this.Locator.LocateElements(this.Bys).ToList();
                 if (this.ShouldCached)
                 {
@@ -48,6 +46,8 @@
                 return elements;
             }
         }
+
+        public Action FrameSwitcher { get; set; }
 
         /// <summary>
         /// Invokes the method that is specified in the provided <see cref="IMessage"/> on the

@@ -17,8 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReportPortal.Shared", "Repo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReportPortal.NLog", "ReportPortal\logger-net-nlog-master\ReportPortal.NLog\ReportPortal.NLog.csproj", "{70180475-1419-4479-ABA5-C910EE5CE3FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllProjects", "AllProjects\AllProjects.csproj", "{4474FC48-0D28-49B4-8E78-8A1C9ACE7492}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,10 +47,6 @@ Global
 		{70180475-1419-4479-ABA5-C910EE5CE3FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70180475-1419-4479-ABA5-C910EE5CE3FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70180475-1419-4479-ABA5-C910EE5CE3FA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4474FC48-0D28-49B4-8E78-8A1C9ACE7492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4474FC48-0D28-49B4-8E78-8A1C9ACE7492}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4474FC48-0D28-49B4-8E78-8A1C9ACE7492}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4474FC48-0D28-49B4-8E78-8A1C9ACE7492}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,7 +56,6 @@ Global
 		{2823C651-F4D9-4734-9FE8-30B523FD3389} = {5B103071-76A4-4C9D-963A-91AA2D31175D}
 		{8012431A-A374-484C-84F2-FAA880BBA356} = {5B103071-76A4-4C9D-963A-91AA2D31175D}
 		{70180475-1419-4479-ABA5-C910EE5CE3FA} = {5B103071-76A4-4C9D-963A-91AA2D31175D}
-		{4474FC48-0D28-49B4-8E78-8A1C9ACE7492} = {5B103071-76A4-4C9D-963A-91AA2D31175D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5C1B3EEB-314F-4FD4-A545-495E4EEAA681}

@@ -10,7 +10,7 @@
         public static TResult Wait<TElement, TResult>(this TElement element, Func<TElement, TResult> condition, double timeout = -1, params Type[] exceptionTypes) where TElement : WebElement
         {
             timeout = timeout < 0 ? WebElement.DefaultWaitTimeout : timeout;
-            return element.WrappedDriver.Wait(d => condition(element), timeout, exceptionTypes);
+            return element.Driver.Wait(d => condition(element), timeout, exceptionTypes);
         }
         public static TElement WaitUntil<TElement>(this TElement element, Func<TElement, bool> condition, double timeout = -1, params Type[] exceptionTypes) where TElement : WebElement
         {

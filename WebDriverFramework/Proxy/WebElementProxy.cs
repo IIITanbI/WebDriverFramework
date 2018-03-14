@@ -9,6 +9,10 @@
     using System.Reflection;
     using System.Runtime.Remoting;
     using System.Runtime.Remoting.Messaging;
+    internal interface ICacheable
+    {
+        bool IsCached { get; }
+    }
 
     public class WebElementProxy : DriverObjectProxy, IRemotingTypeInfo, ICacheable, IWrapsElement
     {
@@ -16,8 +20,7 @@
         {
             typeof(ILocatable),
             typeof(IWebElement),
-            typeof(IWrapsElement),
-            typeof(ICacheable)
+            typeof(IWrapsElement)
         };
 
         private IWebElement cachedElement;
@@ -26,19 +29,16 @@
         {
             this.cachedElement = element;
         }
-
-        public WebElementProxy(IEnumerable<By> bys, ISearchContext context, bool shouldCached = false)
-            : this(typeof(IWebElement), new DefaultElementLocator(context), bys, shouldCached)
+        public WebElementProxy(IEnumerable<By> bys, IElementLocator locator, bool shouldCached = false)
+            : this(typeof(IWebElement), locator, bys, shouldCached)
         {
         }
-
         public WebElementProxy(Type typeToBeProxied, IElementLocator locator, IEnumerable<By> bys, bool shouldCached)
             : base(typeToBeProxied, locator, bys, shouldCached)
         {
         }
 
         public bool IsCached => (cachedElement as ICacheable)?.IsCached ?? cachedElement is RemoteWebElement;
-
         public IWebElement WrappedElement
         {
             get
@@ -48,6 +48,7 @@
                     return this.cachedElement;
                 }
 
+                this.FrameSwitcher?.Invoke();
                 var element = this.Locator.LocateElement(this.Bys);
                 if (this.ShouldCached)
                 {
@@ -58,15 +59,13 @@
             }
         }
 
+        public Action FrameSwitcher { get; set; }
+
         public override IMessage Invoke(IMessage msg)
         {
             IMethodCallMessage methodCallMessage = msg as IMethodCallMessage;
 
             var declaringType = (methodCallMessage.MethodBase as MethodInfo).DeclaringType;
-            if (typeof(ICacheable) == declaringType)
-            {
-                return InvokeMethod(this, methodCallMessage);
-            }
 
             var element = this.WrappedElement;
             if (typeof(IWrapsElement).IsAssignableFrom(declaringType))
@@ -76,6 +75,7 @@
 
             return InvokeMethod(element, methodCallMessage);
         }
+
         public bool CanCastTo(Type fromType, object o)
         {
             return InterfacesToBeProxied.Contains(fromType);

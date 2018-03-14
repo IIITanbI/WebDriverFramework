@@ -94,17 +94,18 @@ namespace ReportPortal.NUnitExtension
                 if (!eventArg.Canceled)
                 {
                     Bridge.Context.LaunchReporter.Finish(finishLaunchRequest);
-                    Bridge.Context.LaunchReporter.FinishTask.Wait();
 
-                    try
+                    Bridge.Context.LaunchReporter.FinishTask.ContinueWith(t =>
                     {
-                        if (AfterRunFinished != null) AfterRunFinished(this, new RunFinishedEventArgs(Bridge.Service, finishLaunchRequest, Bridge.Context.LaunchReporter));
-                    }
-                    catch (Exception exp)
-                    {
-                        Console.WriteLine("Exception was thrown in 'AfterRunFinished' subscriber." + Environment.NewLine + exp);
-                    }
-
+                        try
+                        {
+                            if (AfterRunFinished != null) AfterRunFinished(this, new RunFinishedEventArgs(Bridge.Service, finishLaunchRequest, Bridge.Context.LaunchReporter));
+                        }
+                        catch (Exception exp)
+                        {
+                            Console.WriteLine("Exception was thrown in 'AfterRunFinished' subscriber." + Environment.NewLine + exp);
+                        }
+                    });
                 }
             }
             catch (Exception exception)

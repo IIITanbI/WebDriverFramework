@@ -68,7 +68,6 @@ namespace ReportPortal.Client
         {
             var uri = BaseUri.Append($"{Project}/log");
 
-
             if (model.Attach == null)
             {
                 var body = ModelSerializer.Serialize<AddLogItemRequest>(model);
