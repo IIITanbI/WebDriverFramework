@@ -114,7 +114,7 @@
         }
         protected IElementLocator GetParentElementLocator()
         {
-            ISearchContext context = this.Driver.Driver;
+            ISearchContext context = new WebDriverSearchContext(this.Driver);
             if (this.Parent != null && !(this.Parent is IFrameElement))
             {
                 context = this.Parent.ProxyElement;
@@ -136,14 +136,14 @@
         }
         protected void SwitchFrames(IEnumerable<WebElement> elements)
         {
-            var parentFrame = elements.LastOrDefault(p => p is IFrameElement);
+            var parentFrame = elements.OfType<IFrameElement>().LastOrDefault();
             if (parentFrame == null)
             {
-                this.Driver.Driver.SwitchTo().DefaultContent();
+                this.Driver.NativeDriver.SwitchTo().DefaultContent();
             }
             else
             {
-                this.Driver.Driver.SwitchTo().Frame(parentFrame.Element);
+                this.Driver.NativeDriver.SwitchTo().Frame(parentFrame.Element);
             }
         }
     }

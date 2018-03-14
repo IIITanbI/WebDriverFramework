@@ -45,7 +45,7 @@ namespace ConsoleApp1
 
         public Program(WebDriver driver)
         {
-            CustomPageFactory.InitElements(this, driver.Driver, new CustomPageObjectMemberDecorator(driver));
+            CustomPageFactory.InitElements(this, driver.NativeDriver, new CustomPageObjectMemberDecorator(driver));
         }
 
         public static void AssertTrue(bool value)
@@ -176,7 +176,7 @@ namespace ConsoleApp1
 
             var driver = new WebDriver(new ChromeDriver(opt));
 
-            driver.Driver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test1.html");
+            driver.NativeDriver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test1.html");
             //driver.Driver.Navigate().GoToUrl("https://onliner.by");
             //var rssesult = driver.Driver.ExecuteJavaScript<string>("return window.localStorage");
             //var rssessult = driver.Driver.ExecuteJavaScript<string>("window.localStorage.setItem('key', 'value')");
@@ -194,16 +194,16 @@ namespace ConsoleApp1
             driver.Quit();
             return;
             var checkbox = new LabelElement(By.XPath("asdsad"), null, driver);
-            var c1eckbox = ElementFactory.Create<CheckBox>(By.XPath("asdsad"), null, driver.Driver);
+            var c1eckbox = ElementFactory.Create<CheckBox>(By.XPath("asdsad"), null, driver.NativeDriver);
             var z = checkbox.Wait(elemet => elemet.Displayed);
             checkbox.Click();
             var result1s = checkbox.Locate();
             driver.Find("//input[@id='input']").Click();
 
             var pr = new Program(driver);
-            var p1 = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(driver.Driver), new[] { By.XPath(".//*") }, true);
+            var p1 = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(driver.NativeDriver), new[] { By.XPath(".//*") }, true);
             var tp1 = p1.GetTransparentProxy();
-            p1.Locator = new DefaultElementLocator(driver.Driver);
+            p1.Locator = new DefaultElementLocator(driver.NativeDriver);
             var tp2 = p1.GetTransparentProxy();
             Console.WriteLine(tp1 == tp2);
             //Console.WriteLine(p1.WrappedElement.TagName);

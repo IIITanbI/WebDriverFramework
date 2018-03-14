@@ -12,23 +12,23 @@
 
     public class WebDriver : IGetElement, IGetElements
     {
-        public WebDriver(IWebDriver driver)
+        public WebDriver(IWebDriver nativeDriver)
         {
-            this.Driver = driver;
+            this.NativeDriver = nativeDriver;
         }
 
-        public IWebDriver Driver { get; }
+        public IWebDriver NativeDriver { get; }
 
         public T Get<T>(By locator) => ElementFactory.Create<T>(locator, null, this);
         public IEnumerable<T> GetAll<T>(By locator)
         {
-            return new WebElementListProxy(new[] { locator }, new DefaultElementLocator(this.Driver), false)
+            return new WebElementListProxy(new[] { locator }, new DefaultElementLocator(this.NativeDriver), false)
                 .Elements.Select(e => ElementFactory.Create<T>(e, this));
         }
 
         public WebDriverWait GetWait(double timeout, params Type[] exceptionTypes)
         {
-            var wait = new WebDriverWait(this.Driver, TimeSpan.FromSeconds(timeout));
+            var wait = new WebDriverWait(this.NativeDriver, TimeSpan.FromSeconds(timeout));
             wait.IgnoreExceptionTypes(exceptionTypes);
             return wait;
         }
@@ -52,12 +52,12 @@
         }
         public T ExecuteJavaScript<T>(string script, object[] args, ILogger log = null)
         {
-            return this.Driver.ExecuteJavaScript<T>(script, args);
+            return this.NativeDriver.ExecuteJavaScript<T>(script, args);
         }
 
         public void Quit()
         {
-            this.Driver.Quit();
+            this.NativeDriver.Quit();
         }
     }
 }
