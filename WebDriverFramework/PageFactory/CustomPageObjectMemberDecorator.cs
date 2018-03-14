@@ -16,7 +16,7 @@
         private readonly Dictionary<MemberInfo, object> _membersDictionary = new Dictionary<MemberInfo, object>();
         private readonly Dictionary<MemberInfo, DriverObjectProxy> _proxyDictionary = new Dictionary<MemberInfo, DriverObjectProxy>();
 
-        private WebDriver _driver { get; }
+        private readonly WebDriver _driver;
 
         public CustomPageObjectMemberDecorator(WebDriver driver)
         {
@@ -50,7 +50,7 @@
                 proxyElement = new WebElementProxy(targetType, locator, bys, cache);
                 result = proxyElement.GetTransparentProxy();
             }
-            else if (targetType.IsAssignableFrom(typeof(List<IWebElement>)))
+            else if (targetType == typeof(IList<IWebElement>))
             {
                 proxyElement = new WebElementListProxy(targetType, locator, bys, cache);
                 result = proxyElement.GetTransparentProxy();
@@ -134,6 +134,7 @@
                 {
                     case WebElement ___:
                     case IWebElement __:
+                    case IList<IWebElement> _:
                         break;
                     default:
                         throw new NotImplementedException($"Type '{GetTargetType(member)}' is not supported as child for '{GetTargetType(parentMember)}'");

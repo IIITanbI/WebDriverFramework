@@ -10,7 +10,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public class WebDriver : IFindElement
+    public class WebDriver : IGetElement, IGetElements
     {
         public WebDriver(IWebDriver driver)
         {

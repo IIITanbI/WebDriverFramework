@@ -54,12 +54,7 @@
         /// object which this proxy represents.</returns>
         protected static ReturnMessage InvokeMethod(object representedValue, IMethodCallMessage msg)
         {
-            if (msg == null)
-            {
-                throw new ArgumentNullException(nameof(msg), "The message containing invocation information cannot be null");
-            }
-
-            MethodInfo proxiedMethod = msg.MethodBase as MethodInfo;
+            var proxiedMethod = (MethodInfo)msg.MethodBase;
             return new ReturnMessage(proxiedMethod.Invoke(representedValue, msg.Args), null, 0, msg.LogicalCallContext, msg);
         }
 

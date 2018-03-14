@@ -58,15 +58,15 @@
 
         public bool Enabled => Element.Enabled;
 
-        public void Clear()
+        public void Clear(ILogger log = null)
         {
             this.Element.Clear();
         }
-        public void Submit()
+        public void Submit(ILogger log = null)
         {
             this.Element.Submit();
         }
-        public void CopyPaste(string text)
+        public void CopyPaste(string text, ILogger log = null)
         {
             lock (Lock)
             {
@@ -85,11 +85,11 @@
             }
         }
 
-        public void Send(string text)
+        public void Send(string text, ILogger log = null)
         {
             this.Element.SendKeys(text);
         }
-        public void SendByChars(string text)
+        public void SendByChars(string text, ILogger log = null)
         {
             foreach (var ch in text)
             {
@@ -97,26 +97,26 @@
             }
         }
 
-        public void SelectText()
+        public void SelectText(ILogger log = null)
         {
             this.Send(OpenQA.Selenium.Keys.LeftControl + "a");
         }
-        public void ClearAndSetText(string text)
+        public void ClearAndSetText(string text, ILogger log = null)
         {
             this.Clear();
             this.Send(text);
         }
-        public void ClearAndSetTextByChars(string text)
+        public void ClearAndSetTextByChars(string text, ILogger log = null)
         {
             this.Clear();
             this.SendByChars(text);
         }
-        public void SelectAndSetText(string text)
+        public void SelectAndSetText(string text, ILogger log = null)
         {
             this.SelectText();
             this.Send(text);
         }
-        public void SelectAndSetTextByChars(string text)
+        public void SelectAndSetTextByChars(string text, ILogger log = null)
         {
             this.SelectText();
             this.SendByChars(text);
@@ -134,7 +134,18 @@
         {
         }
 
-        public bool Selected => Element.Selected;
+        public bool Selected => this.Element.Selected;
+
+        public void Select(ILogger log = null) => SetState(true, log);
+        public void Deselect(ILogger log = null) => SetState(false, log);
+        public void SetState(bool state, ILogger log = null)
+        {
+            if (this.Element.Selected != state)
+            {
+                this.Element.Click();
+            }
+        }
+
         public CheckBox Locate() => new CheckBox(this.Element, this.Driver);
     }
 }

@@ -9,7 +9,7 @@
     using System.Drawing;
     using System.Linq;
 
-    public abstract partial class WebElement : IFindElement
+    public abstract partial class WebElement : IGetElement, IGetElements
     {
         private WebElement _parent;
         private readonly WebElementProxy _webElementProxy;

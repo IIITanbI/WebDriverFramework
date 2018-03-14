@@ -69,10 +69,7 @@
             return InvokeMethod(element, methodCallMessage);
         }
 
-        public bool CanCastTo(Type fromType, object o)
-        {
-            return InterfacesToBeProxied.Contains(fromType);
-        }
+        public bool CanCastTo(Type fromType, object o) => InterfacesToBeProxied.Contains(fromType);
         public string TypeName
         {
             get => throw new NotImplementedException();

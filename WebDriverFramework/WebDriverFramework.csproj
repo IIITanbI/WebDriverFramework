@@ -55,7 +55,7 @@
     <Compile Include="Elements\Elements.cs" />
     <Compile Include="ElementFactory.cs" />
     <Compile Include="Elements\IFrameElement.cs" />
-    <Compile Include="IFindElement.cs" />
+    <Compile Include="IGetElement.cs" />
     <Compile Include="Elements\ILocate.cs" />
     <Compile Include="Elements\WebElement.JS.cs" />
     <Compile Include="Extension\FindExtension.cs" />
