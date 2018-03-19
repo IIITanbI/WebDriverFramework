@@ -81,6 +81,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\PageObject\PageObject.csproj">
+      <Project>{E5C43050-4E5C-4FD9-9FE1-DF8DA024FFC8}</Project>
+      <Name>PageObject</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ReportPortal\client-net-master\client-net-master\ReportPortal.Client\ReportPortal.Client.csproj">
       <Project>{2823c651-f4d9-4734-9fe8-30b523fd3389}</Project>
       <Name>ReportPortal.Client</Name>

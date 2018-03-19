@@ -61,4 +61,41 @@
             return InvokeMethod(elements, msg as IMethodCallMessage);
         }
     }
+
+    public class WebElementListProxy<T> : WebElementListProxy
+    {
+        private List<T> _cachedElements;
+
+        public WebElementListProxy(List<T> elements) : this(null, null, false)
+        {
+            this._cachedElements = elements;
+        }
+        public WebElementListProxy(IEnumerable<By> bys, IElementLocator locator, bool shouldCached = false)
+            : base(typeof(IList<T>), locator, bys, shouldCached)
+        {
+        }
+
+        /// <summary>
+        /// Gets the list of IWebElement objects this proxy represents, returning a cached one if requested.
+        /// </summary>
+        public List<T> WebElements
+        {
+            get
+            {
+                if (this._cachedElements != null)
+                {
+                    return this._cachedElements.ToList();
+                }
+
+                this.OnBeforeSearching();
+                var elements = this.Elements.Select(e => ElementFactory.Create<T>(e, this)).ToList();
+                if (this.ShouldCached)
+                {
+                    this._cachedElements = elements;
+                }
+
+                return elements;
+            }
+        }
+    }
 }

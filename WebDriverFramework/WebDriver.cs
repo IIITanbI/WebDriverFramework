@@ -1,14 +1,16 @@
-﻿namespace WebDriverFramework
+﻿using System.Collections;
+using System.Linq;
+
+namespace WebDriverFramework
 {
     using Elements;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Support.Extensions;
-    using OpenQA.Selenium.Support.PageObjects;
     using OpenQA.Selenium.Support.UI;
-    using Proxy;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+
+  
 
     public class WebDriver : IGetElement, IGetElements
     {
@@ -22,8 +24,7 @@
         public T Get<T>(By locator) => ElementFactory.Create<T>(locator, null, this);
         public IEnumerable<T> GetAll<T>(By locator)
         {
-            return new WebElementListProxy(new[] { locator }, new DefaultElementLocator(this.NativeDriver), false)
-                .Elements.Select(e => ElementFactory.Create<T>(e, this));
+            return this.NativeDriver.FindElements(locator).Select(e => ElementFactory.Create<T>(e, this));
         }
 
         public WebDriverWait GetWait(double timeout, params Type[] exceptionTypes)

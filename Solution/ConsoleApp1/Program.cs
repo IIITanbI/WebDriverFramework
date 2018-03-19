@@ -65,24 +65,8 @@ namespace ConsoleApp1
         }
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        public void button1()
 
-        {
-            var temp = testAsync();
-            Debug.WriteLine("pass");
-            var value = temp.Result; //Blocking forever....
-        }
-
-        private async Task<bool> testAsync()
-        {
-            return await Task.Run(() =>
-            {
-                Debug.WriteLine("start wait one");
-                Debug.WriteLine("reset");
-                return true; //Code goes here without any error.....
-            });
-        }
-
+       
         static void Main(string[] args)
         {
             //Bridge.Service = new Service(new Uri("http://localhost:8080/api/v1/"), "myproject", "7a580212-5f06-4f46-8cc3-3f78cc4aa282");
@@ -201,15 +185,6 @@ namespace ConsoleApp1
             driver.Find("//input[@id='input']").Click();
 
             var pr = new Program(driver);
-            var p1 = new WebElementProxy(typeof(IWebElement), new DefaultElementLocator(driver.NativeDriver), new[] { By.XPath(".//*") }, true);
-            var tp1 = p1.GetTransparentProxy();
-            p1.Locator = new DefaultElementLocator(driver.NativeDriver);
-            var tp2 = p1.GetTransparentProxy();
-            Console.WriteLine(tp1 == tp2);
-            //Console.WriteLine(p1.WrappedElement.TagName);
-            var p2 = new WebElementProxy((IWebElement)p1.GetTransparentProxy());
-            Console.WriteLine(pr.element2.Text);
-            Console.WriteLine();
 
             //var elements = driver.Get("/*").FindAll();
             //var zzzxczx = elements.Count;

@@ -1,4 +1,6 @@
-﻿namespace WebDriverFramework.PageFactory
+﻿using PageObject.Proxy;
+
+namespace WebDriverFramework.PageFactory
 {
     using Attributes;
     using Elements;
@@ -117,18 +119,7 @@
                 var current = _membersDictionary[member];
                 var parent = _membersDictionary[parentMember];
 
-                ISearchContext context;
-                switch (parent)
-                {
-                    case WebElement w:
-                        context = w.ProxyElement;
-                        break;
-                    case IWebElement iw:
-                        context = iw;
-                        break;
-                    default:
-                        throw new NotImplementedException($"Type '{GetTargetType(parentMember)}' is not supported as parent");
-                }
+                
 
                 switch (current)
                 {
@@ -146,6 +137,20 @@
                         we.Parent = pwe;
                         break;
                     default:
+                        ISearchContext context;
+                        switch (parent)
+                        {
+                            case WebElement w:
+                                context = null;
+                                throw new NotImplementedException($"Type '{GetTargetType(parentMember)}' is not supported as parent");
+                                break;
+                            case IWebElement iw:
+                                context = iw;
+                                break;
+                            default:
+                                throw new NotImplementedException($"Type '{GetTargetType(parentMember)}' is not supported as parent");
+                        }
+
                         this._proxyDictionary[member].Locator = new DefaultElementLocator(context);
                         break;
                 }
