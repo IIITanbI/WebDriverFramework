@@ -98,7 +98,7 @@
         public T Get<T>(By locator) => ElementFactory.Create<T>(locator, this, null);
         public IEnumerable<T> GetAll<T>(By locator)
         {
-            var proxy = new WebElementListProxy(new[] { locator }, this.GetElementLocator(), false);
+            var proxy = new WebElementListProxy(new[] { locator }, this.GetElementLocator());
             proxy.BeforeSearching += (o, e) => SwitchFrames(this.AllParents.Concat(new[] { this }));
 
             return proxy.Elements.Select(e => ElementFactory.Create<T>(e, this.Driver));
