@@ -1,8 +1,8 @@
-﻿namespace WebDriverFramework.PageFactory.Attributes
-{
-    using System;
-    using OpenQA.Selenium;
+﻿using System;
+using OpenQA.Selenium;
 
+namespace PageObject.PageFactory.Attributes
+{
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public abstract class ByAttribute : Attribute
     {

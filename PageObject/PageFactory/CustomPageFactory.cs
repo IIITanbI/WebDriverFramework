@@ -1,8 +1,8 @@
-﻿namespace WebDriverFramework.PageFactory
-{
-    using OpenQA.Selenium;
-    using OpenQA.Selenium.Support.PageObjects;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Support.PageObjects;
 
+namespace PageObject.PageFactory
+{
     public static class CustomPageFactory
     {
         /// <summary>
@@ -35,7 +35,7 @@
         /// </exception>
         public static void InitElements(object page, IElementLocator locator, IPageObjectMemberDecorator decorator)
         {
-            PageFactory.InitElements(page, locator, decorator);
+            OpenQA.Selenium.Support.PageObjects.PageFactory.InitElements(page, locator, decorator);
             FinishDecorate(page, decorator);
         }
 

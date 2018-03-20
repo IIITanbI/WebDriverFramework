@@ -1,13 +1,13 @@
-﻿namespace WebDriverFramework.Proxy
-{
-    using OpenQA.Selenium;
-    using OpenQA.Selenium.Support.PageObjects;
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using System.Runtime.Remoting.Messaging;
-    using System.Runtime.Remoting.Proxies;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.Remoting.Messaging;
+using System.Runtime.Remoting.Proxies;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.PageObjects;
 
+namespace PageObject.Proxy
+{
     /// <summary>
     /// Represents a base proxy class for objects used with the PageFactory.
     /// </summary>

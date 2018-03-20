@@ -1,7 +1,7 @@
-namespace WebDriverFramework.PageFactory.Attributes
-{
-    using System;
+using System;
 
+namespace PageObject.PageFactory.Attributes
+{
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public class RelateToAttribute : Attribute
     {

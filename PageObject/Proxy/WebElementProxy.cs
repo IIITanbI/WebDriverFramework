@@ -8,7 +8,6 @@ using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.PageObjects;
 using WebDriverFramework.Elements;
-using WebDriverFramework.Proxy;
 
 namespace PageObject.Proxy
 {

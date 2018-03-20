@@ -13,12 +13,11 @@ using NLog;
 using NLog.Targets;
 using NUnit.Framework;
 using OpenQA.Selenium.IE;
+using PageObject.PageFactory;
+using PageObject.PageFactory.Attributes;
 using WebDriverFramework;
 using WebDriverFramework.Elements;
 using WebDriverFramework.Extension;
-using WebDriverFramework.PageFactory;
-using WebDriverFramework.PageFactory.Attributes;
-using WebDriverFramework.Proxy;
 
 namespace ConsoleApp1
 {

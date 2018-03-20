@@ -1,12 +1,13 @@
-﻿namespace WebDriverFramework.Proxy
-{
-    using OpenQA.Selenium;
-    using OpenQA.Selenium.Support.PageObjects;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Runtime.Remoting.Messaging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.PageObjects;
+using WebDriverFramework;
 
+namespace PageObject.Proxy
+{
     public class WebElementListProxy : DriverObjectProxy
     {
         private List<IWebElement> _cachedElements;

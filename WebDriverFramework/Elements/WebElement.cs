@@ -7,12 +7,6 @@
     using System.Drawing;
     using System.Linq;
 
-    public interface IMyWebElement : IElement
-    {
-        IMyWebElement Parent { get; }
-        WebDriver Driver { get; }
-    }
-
     public abstract partial class WebElement : IMyWebElement, IGetElement, IGetElements
     {
         public static double DefaultWaitTimeout { get; set; } = 60;

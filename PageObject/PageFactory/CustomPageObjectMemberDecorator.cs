@@ -1,18 +1,17 @@
-﻿using PageObject.Proxy;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reflection;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.PageObjects;
+using PageObject.PageFactory.Attributes;
+using PageObject.Proxy;
+using WebDriverFramework;
+using WebDriverFramework.Elements;
 
-namespace WebDriverFramework.PageFactory
+namespace PageObject.PageFactory
 {
-    using Attributes;
-    using Elements;
-    using OpenQA.Selenium;
-    using OpenQA.Selenium.Support.PageObjects;
-    using Proxy;
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Linq;
-    using System.Reflection;
-
     public class CustomPageObjectMemberDecorator : ICustomPageObjectMemberDecorator
     {
         private readonly Dictionary<MemberInfo, object> _membersDictionary = new Dictionary<MemberInfo, object>();

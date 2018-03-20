@@ -1,4 +1,4 @@
-﻿namespace WebDriverFramework.Proxy
+﻿namespace PageObject.Proxy
 {
     internal interface ICacheable
     {
