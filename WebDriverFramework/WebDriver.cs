@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace WebDriverFramework
+﻿namespace WebDriverFramework
 {
     using Elements;
     using OpenQA.Selenium;
@@ -19,10 +17,7 @@ namespace WebDriverFramework
         public IWebDriver NativeDriver { get; }
 
         public T Get<T>(By locator) => ElementFactory.Create<T>(locator, null, this);
-        public IEnumerable<T> GetAll<T>(By locator)
-        {
-            return this.NativeDriver.FindElements(locator).Select(e => ElementFactory.Create<T>(e, this));
-        }
+        public IEnumerable<T> GetAll<T>(By locator) => new FindAllHelper<T>(this, locator);
 
         public WebDriverWait GetWait(double timeout, params Type[] exceptionTypes)
         {
