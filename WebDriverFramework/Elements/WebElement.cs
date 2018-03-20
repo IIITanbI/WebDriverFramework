@@ -1,4 +1,6 @@
-﻿namespace WebDriverFramework.Elements
+﻿using System.Collections;
+
+namespace WebDriverFramework.Elements
 {
     using OpenQA.Selenium;
     using System;
@@ -114,7 +116,7 @@
         }
 
         public T Get<T>(By locator) => ElementFactory.Create<T>(locator, this, null);
-        public IEnumerable<T> GetAll<T>(By locator) => this.Element.FindElements(locator).Select(e => ElementFactory.Create<T>(e, this.Driver));
+        public IEnumerable<T> GetAll<T>(By locator) => new FindAllHelper<T>(this, locator);
 
         protected void StubAction()
         {
@@ -124,17 +126,6 @@
                 throw new NotImplementedException();
             }
         }
-
-        //protected IWebElement UnwrapProxy()
-        //{
-        //    var element = this.ProxyElement;
-        //    while (element is IWrapsElement wrap)
-        //    {
-        //        element = wrap.WrappedElement;
-        //    }
-
-        //    return element;
-        //}
 
         protected void SwitchToParentFrame()
         {
@@ -148,5 +139,25 @@
                 this.Driver.NativeDriver.SwitchTo().Frame(parentFrame.Element);
             }
         }
+    }
+
+    class FindAllHelper<T> : IEnumerable<T>
+    {
+        private readonly WebElement _element;
+        private readonly By _locator;
+
+        public FindAllHelper(WebElement element, By locator)
+        {
+            this._element = element;
+            this._locator = locator;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return this._element.Element.FindElements(this._locator)
+                .Select(e => ElementFactory.Create<T>(e, this._element.Driver))
+                .GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 }

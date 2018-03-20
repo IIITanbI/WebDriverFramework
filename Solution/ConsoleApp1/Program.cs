@@ -66,7 +66,7 @@ namespace ConsoleApp1
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
 
-       
+
         static void Main(string[] args)
         {
             //Bridge.Service = new Service(new Uri("http://localhost:8080/api/v1/"), "myproject", "7a580212-5f06-4f46-8cc3-3f78cc4aa282");
@@ -156,8 +156,7 @@ namespace ConsoleApp1
             //WebElement.DefaultElementSearchTimeout = 60;
 
             var opt = new ChromeOptions();
-            opt.AddArgument("disable-infobars");
-
+            opt.AddExcludedArgument("enable-automation");
             var driver = new WebDriver(new ChromeDriver(opt));
 
             driver.NativeDriver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test1.html");
@@ -166,8 +165,10 @@ namespace ConsoleApp1
             //var rssessult = driver.Driver.ExecuteJavaScript<string>("window.localStorage.setItem('key', 'value')");
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
 
-            var label = driver.GetAll("//*[@class='test']").ToList();
-
+            var label = driver.Get("./*");
+            var ll = label.GetAll();
+            var ll1 = ll.ToList();
+            var ll2 = ll.ToList();
             var frame1 = driver.Get<FrameElement>("//*[@id='1']");
             var frame2 = driver.Get<FrameElement>("//*[@id='2']");
             var frame3 = frame1.Get<FrameElement>("//*[@id='3']");

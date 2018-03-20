@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Linq;
+﻿using System.Linq;
 
 namespace WebDriverFramework
 {
@@ -9,8 +8,6 @@ namespace WebDriverFramework
     using OpenQA.Selenium.Support.UI;
     using System;
     using System.Collections.Generic;
-
-  
 
     public class WebDriver : IGetElement, IGetElements
     {
