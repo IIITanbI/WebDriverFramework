@@ -2,7 +2,6 @@
 {
     using OpenQA.Selenium;
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
@@ -132,25 +131,5 @@
                 this.Driver.SwitchToFrame(parentFrame);
             }
         }
-    }
-
-    class FindAllHelper<T> : IEnumerable<T>
-    {
-        private readonly WebElement _element;
-        private readonly By _locator;
-
-        public FindAllHelper(WebElement element, By locator)
-        {
-            this._element = element;
-            this._locator = locator;
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return this._element.Element.FindElements(this._locator)
-                .Select(e => ElementFactory.Create<T>(e, this._element.Driver))
-                .GetEnumerator();
-        }
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 }

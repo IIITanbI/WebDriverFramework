@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Condition.cs" />
+    <Compile Include="FindAllHelper.cs" />
     <Compile Include="Elements\IMyWebElement.cs" />
     <Compile Include="IElement.cs" />
     <Compile Include="IGetElements.cs" />
