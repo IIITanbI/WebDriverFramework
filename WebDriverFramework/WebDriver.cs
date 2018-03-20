@@ -53,6 +53,15 @@ namespace WebDriverFramework
             return this.NativeDriver.ExecuteJavaScript<T>(script, args);
         }
 
+        public void SwitchToDefaultContent(ILogger log = null)
+        {
+            this.NativeDriver.SwitchTo().DefaultContent();
+        }
+        public void SwitchToFrame(IFrameElement element, ILogger log = null)
+        {
+            this.NativeDriver.SwitchTo().Frame(element.Element);
+        }
+
         public void Quit()
         {
             this.NativeDriver.Quit();

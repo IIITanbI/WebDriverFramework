@@ -1,25 +1,31 @@
-﻿using System.Collections;
-
-namespace WebDriverFramework.Elements
+﻿namespace WebDriverFramework.Elements
 {
     using OpenQA.Selenium;
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
 
-    public abstract partial class WebElement : IGetElement, IGetElements
+    public interface IMyWebElement : IElement
     {
-        private WebElement _parent;
+        IMyWebElement Parent { get; }
+        WebDriver Driver { get; }
+    }
 
+    public abstract partial class WebElement : IMyWebElement, IGetElement, IGetElements
+    {
         public static double DefaultWaitTimeout { get; set; } = 60;
+
+        private IMyWebElement _parent;
+        private readonly IWebElement _implicitElement;
 
         protected WebElement(IWebElement implicitElement, WebDriver driver)
         {
             this._implicitElement = implicitElement;
             this.Driver = driver;
         }
-        protected WebElement(By locator, WebElement parent, WebDriver driver = null)
+        protected WebElement(By locator, IMyWebElement parent, WebDriver driver = null)
         {
             this.Locator = locator;
             this._parent = parent;
@@ -27,45 +33,8 @@ namespace WebDriverFramework.Elements
         }
 
         public WebDriver Driver { get; }
-
-        public bool ShouldCached { get; set; }
-
-        private IWebElement _implicitElement;
-
-        private ISearchContext ParentContext => this.Parent != null ? this.Parent.Element : (ISearchContext)this.Driver.NativeDriver;
-
-        public virtual IWebElement Element
-        {
-            get
-            {
-                if (this._implicitElement != null)
-                {
-                    return this._implicitElement;
-                }
-
-                this.SwitchToParentFrame();
-                var element = this.ParentContext.FindElement(this.Locator);
-                if (this.ShouldCached)
-                {
-                    this._implicitElement = element;
-                }
-
-                return element;
-            }
-        }
-
-        protected IList<WebElement> AllParents
-        {
-            get
-            {
-                var parents = this.Parent?.AllParents;
-                parents?.Add(this.Parent);
-                return parents ?? new List<WebElement>();
-            }
-        }
         public By Locator { get; }
-
-        public WebElement Parent
+        public IMyWebElement Parent
         {
             get => this._parent;
             set
@@ -78,6 +47,36 @@ namespace WebDriverFramework.Elements
                 this._parent = value;
             }
         }
+        public IList<IMyWebElement> Parents
+        {
+            get
+            {
+                var parent = this.Parent;
+                var parents = new List<IMyWebElement>();
+                while (parent != null)
+                {
+                    parents.Add(parent);
+                    parent = parent.Parent;
+                }
+                return parents;
+            }
+        }
+        public virtual IWebElement Element
+        {
+            get
+            {
+                if (this._implicitElement != null)
+                {
+                    return this._implicitElement;
+                }
+
+                this.SwitchToParentFrame();
+                var element = this.ParentContext.FindElement(this.Locator);
+                return element;
+            }
+        }
+
+        private ISearchContext ParentContext => this.Parent != null ? this.Parent.Element : (ISearchContext)this.Driver.NativeDriver;
 
         #region Element properties
         public bool Exist
@@ -129,14 +128,14 @@ namespace WebDriverFramework.Elements
 
         protected void SwitchToParentFrame()
         {
-            var parentFrame = this.AllParents.OfType<IFrameElement>().LastOrDefault();
+            var parentFrame = this.Parents.OfType<IFrameElement>().LastOrDefault();
             if (parentFrame == null)
             {
-                this.Driver.NativeDriver.SwitchTo().DefaultContent();
+                this.Driver.SwitchToDefaultContent();
             }
             else
             {
-                this.Driver.NativeDriver.SwitchTo().Frame(parentFrame.Element);
+                this.Driver.SwitchToFrame(parentFrame);
             }
         }
     }

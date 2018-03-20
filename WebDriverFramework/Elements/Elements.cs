@@ -9,7 +9,7 @@
         public FrameElement(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
         {
         }
-        public FrameElement(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
+        public FrameElement(By locator, IMyWebElement parent, WebDriver driver = null) : base(locator, parent, driver)
         {
         }
 
@@ -21,7 +21,7 @@
         public LabelElement(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
         {
         }
-        public LabelElement(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
+        public LabelElement(By locator, IMyWebElement parent, WebDriver driver = null) : base(locator, parent, driver)
         {
         }
 
@@ -35,7 +35,7 @@
         protected InputWebElement(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
         {
         }
-        protected InputWebElement(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
+        protected InputWebElement(By locator, IMyWebElement parent, WebDriver driver = null) : base(locator, parent, driver)
         {
         }
 
@@ -52,7 +52,7 @@
         public TextWebElement(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
         {
         }
-        public TextWebElement(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
+        public TextWebElement(By locator, IMyWebElement parent, WebDriver driver = null) : base(locator, parent, driver)
         {
         }
 
@@ -130,7 +130,7 @@
         public CheckBox(IWebElement implicitElement, WebDriver driver) : base(implicitElement, driver)
         {
         }
-        public CheckBox(By locator, WebElement parent, WebDriver driver = null) : base(locator, parent, driver)
+        public CheckBox(By locator, IMyWebElement parent, WebDriver driver = null) : base(locator, parent, driver)
         {
         }
 

@@ -1,8 +1,8 @@
-﻿namespace WebDriverFramework.Elements
+﻿namespace WebDriverFramework
 {
     using OpenQA.Selenium;
 
-    public interface IFrameElement
+    public interface IElement
     {
         IWebElement Element { get; }
     }
