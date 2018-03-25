@@ -68,6 +68,11 @@ namespace ConsoleApp1
 
         static void Main(string[] args)
         {
+            WebDriver drv = new WebDriver(new ChromeDriver());
+            LabelElement label1 = new LabelElement(By.XPath(","), null, drv);
+            var proxy = new MyProxy<WebDriver>(drv, null).GetTransparentProxy() as WebDriver;
+            proxy.Navigate("https://onliner.by");
+
             //Bridge.Service = new Service(new Uri("http://localhost:8080/api/v1/"), "myproject", "7a580212-5f06-4f46-8cc3-3f78cc4aa282");
             //Bridge.Service = new Service(new Uri("https://rp.epam.com/api/v1/"), "ARTSIOM_KUIS_PERSONAL", "591b2176-229c-4d3e-aca8-bbd02e9e5e55");
             ////591b2176-229c-4d3e-aca8-bbd02e9e5e55
@@ -212,19 +217,23 @@ namespace ConsoleApp1
 
         }
 
-
+        [SetUp]
+        public void Setup()
+        {
+            logger.Info("this is Setup");
+        }
 
         [TestCase]
         public void TestCase1()
         {
-            logger.Info("lol");
+            logger.Info("TestCase1");
         }
 
         [TestCase]
         public void TestCase()
         {
-            logger.Info("asdasd" + "{rp#file#" + @"C:\Users\Artsiom_Kuis\Desktop\test.html}");
-            logger.Info("lol");
+            //logger.Info("asdasd" + "{rp#file#" + @"C:\Users\Artsiom_Kuis\Desktop\test.html}");
+            logger.Info("TestCase");
         }
     }
 
