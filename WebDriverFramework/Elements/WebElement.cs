@@ -93,6 +93,7 @@
         }
         public bool Displayed => Element.Displayed;
 
+        public string Class => this.GetAttribute("class");
         public string TagName => Element.TagName;
         public Point Location => Element.Location;
         public Size Size => Element.Size;

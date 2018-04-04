@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebDriverFramework</RootNamespace>
     <AssemblyName>WebDriverFramework</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -56,7 +56,6 @@
     <Compile Include="Elements\IMyWebElement.cs" />
     <Compile Include="IElement.cs" />
     <Compile Include="IGetElements.cs" />
-    <Compile Include="WebDriverSearchContext.cs" />
     <Compile Include="Elements\Elements.cs" />
     <Compile Include="ElementFactory.cs" />
     <Compile Include="IFrameElement.cs" />
