@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using NLog.Targets;
@@ -15,6 +16,7 @@ using NUnit.Framework;
 using OpenQA.Selenium.IE;
 using PageObject.PageFactory;
 using PageObject.PageFactory.Attributes;
+using ReportPortal.NUnitExtension;
 using WebDriverFramework;
 using WebDriverFramework.Elements;
 using WebDriverFramework.Extension;
@@ -23,6 +25,7 @@ namespace ConsoleApp1
 {
     [Target("RP")]
     [TestFixture]
+    [Parallelizable(ParallelScope.None)]
     class Program
     {
         [ByXPath("//div[@class='test2']")]
@@ -62,12 +65,44 @@ namespace ConsoleApp1
                 throw new Exception("value is not false");
             }
         }
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        public static Logger logger = LogManager.GetCurrentClassLogger();
 
 
+        class Base
+        {
+            public int a = 3;
+            public int b = 5;
+            public int c;
 
+            public Base()
+            {
+                c = a + b;
+            }
+        }
+        class Derived:Base
+        {
+            public int d = 6;
+         
+
+            public Derived() : base()
+            {
+                c = a + d;
+            }
+        }
+
+        class DerivedMore : Derived
+        {
+            public int x = 16;
+
+
+            public DerivedMore() : base()
+            {
+                c = x + d;
+            }
+        }
         static void Main(string[] args)
         {
+            var x = new DerivedMore();
             //Bridge.Service = new Service(new Uri("http://localhost:8080/api/v1/"), "myproject", "7a580212-5f06-4f46-8cc3-3f78cc4aa282");
             //Bridge.Service = new Service(new Uri("https://rp.epam.com/api/v1/"), "ARTSIOM_KUIS_PERSONAL", "591b2176-229c-4d3e-aca8-bbd02e9e5e55");
             ////591b2176-229c-4d3e-aca8-bbd02e9e5e55
@@ -213,21 +248,90 @@ namespace ConsoleApp1
         }
 
 
-
-        [TestCase]
-        public void TestCase1()
+        [SetUp]
+        public void Setup()
         {
-            logger.Info("lol");
+            //throw new ArgumentException();
+            // new TestReporter(null, null, null).Start(null);
+            //new ReportPortalListener().OnTestEvent("<XML></XML>");
+            res = 3;
+            logger.Info("Setup Method ");
+            //Console.WriteLine("SETUP STRING");
         }
 
-        [TestCase]
-        public void TestCase()
+        [TearDown]
+        public void Down()
         {
-            logger.Info("asdasd" + "{rp#file#" + @"C:\Users\Artsiom_Kuis\Desktop\test.html}");
-            logger.Info("lol");
+            res = 0;
+            logger.Info("Down");
+        }
+        private object res = null;
+
+        private int e = (int)10;
+        // [TestCase]
+        public void TestCase1()
+        {
+            for (int i = 0; i < e; i++)
+            {
+                Thread.Sleep(200);
+                logger.Info("1" + res);
+            }
+        }
+
+        // [TestCase]
+        public void TestCase2()
+        {
+            for (int i = 0; i < e; i++)
+            {
+                Thread.Sleep(1000);
+                logger.Info("2");
+            }
         }
     }
 
+    class TestProgramm : Program
+    {
+        [SetUp]
+        public void Setup1()
+        {
+            Thread.Sleep(1000);
+            logger.Info("Setup Method 1");
+        }
+
+        [SetUp]
+        public void Setup2()
+        {
+            Thread.Sleep(1000);
+            logger.Info("Setup Method 2");
+        }
+        [TearDown]
+        public void Down1()
+        {
+            Thread.Sleep(1000);
+            logger.Info("Down 1");
+        }
+
+        [TestCase]
+        public void TestCase3()
+        {
+            logger.Warn("case");
+            Thread.Sleep(1000);
+            for (int i = 0; i < 10; i++)
+            {
+                //Thread.Sleep(100);
+            }
+        }
+
+        [TestCase]
+        public void TestCase4()
+        {
+            Thread.Sleep(200);
+            for (int i = 0; i < 10; i++)
+            {
+                // Thread.Sleep(100);
+            }
+        }
+    }
     public class Graph<T>
     {
         //dictonary - member and his parent 
