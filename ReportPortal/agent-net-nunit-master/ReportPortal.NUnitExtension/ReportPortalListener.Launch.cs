@@ -112,6 +112,8 @@ namespace ReportPortal.NUnitExtension
             {
                 Console.WriteLine("ReportPortal exception was thrown." + Environment.NewLine + exception);
             }
+
+            Console.WriteLine("Finish run done");
         }
     }
 }

@@ -111,7 +111,7 @@ namespace ReportPortal.Shared
                     }
 
                     request.TestItemId = TestId;
-                    Debug.WriteLine($"Log message: '{request.Text}'");
+                    //Console.WriteLine($"ID = {TestId}  Log message: '{request.Text}'");
                     await _service.AddLogItemAsync(request);
                 });
 

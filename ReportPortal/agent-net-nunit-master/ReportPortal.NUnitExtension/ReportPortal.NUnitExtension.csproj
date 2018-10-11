@@ -10,13 +10,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.10.1" />
-    <PackageReference Include="NUnit.Engine.Api" Version="3.8.0" />
+    <ProjectReference Include="..\..\client-net-master\client-net-master\ReportPortal.Client\ReportPortal.Client.csproj" />
+    <ProjectReference Include="..\..\commons-net-master\ReportPortal.Shared\ReportPortal.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\client-net-master\client-net-master\ReportPortal.Client\ReportPortal.Client.csproj" />
-    <ProjectReference Include="..\..\commons-net-master\ReportPortal.Shared\ReportPortal.Shared.csproj" />
+    <Reference Include="nunit.engine">
+      <HintPath>..\..\..\..\Users\Artsiom_Kuis\Downloads\nunit-console-master\nunit-console-master\bin\Debug\nunit.engine.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.engine.api">
+      <HintPath>..\..\..\..\Users\Artsiom_Kuis\Downloads\nunit-console-master\nunit-console-master\bin\Debug\nunit.engine.api.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\..\..\Users\Artsiom_Kuis\Downloads\nunit-console-master\nunit-console-master\bin\Debug\nunit.framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

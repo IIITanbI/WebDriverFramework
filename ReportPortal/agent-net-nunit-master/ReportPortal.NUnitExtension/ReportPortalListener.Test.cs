@@ -25,13 +25,23 @@ namespace ReportPortal.NUnitExtension
                 var parentId = xmlDoc.SelectSingleNode("/*/@parentId").Value;
                 var name = xmlDoc.SelectSingleNode("/*/@name").Value;
                 var fullname = xmlDoc.SelectSingleNode("/*/@fullname").Value;
+                var type = xmlDoc.SelectSingleNode("/*/@type").Value;
 
+               
                 var startTestRequest = new StartTestItemRequest
                 {
                     StartTime = DateTime.UtcNow,
                     Name = name,
                     Type = TestItemType.Step
                 };
+                if (type == "SetUp")
+                {
+                    startTestRequest.Type = TestItemType.BeforeMethod;
+                }
+                if (type == "TearDown")
+                {
+                    startTestRequest.Type = TestItemType.AfterMethod;
+                }
 
                 var beforeTestEventArg = new TestItemStartedEventArgs(Bridge.Service, startTestRequest);
                 try

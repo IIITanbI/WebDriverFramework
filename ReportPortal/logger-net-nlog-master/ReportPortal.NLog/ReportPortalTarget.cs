@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Security;
 using ReportPortal.Client.Models;
 using ReportPortal.Shared;
 using NLog.Targets;
@@ -27,11 +29,14 @@ namespace ReportPortal.Logging
 
         protected override void Write(NLog.LogEventInfo logEvent)
         {
+           // TryLaunchDebugger();
+
+            Debug.WriteLine(logEvent.Message);
             if (!LevelMap.TryGetValue(logEvent.Level, out LogLevel level))
             {
                 level = LogLevel.Info;
             }
-
+            
             try
             {
                 Bridge.LogMessage(level, Layout.Render(logEvent));
@@ -40,6 +45,25 @@ namespace ReportPortal.Logging
             {
                 Console.WriteLine(ex.ToString());
                 throw;
+            }
+        }
+
+        private static void TryLaunchDebugger()
+        {
+            if (Debugger.IsAttached)
+                return;
+
+            try
+            {
+                Debugger.Launch();
+            }
+            catch (SecurityException se)
+            {
+                Environment.Exit(-3);
+            }
+            catch (NotImplementedException nie) //Debugger is not implemented on mono
+            {
+                Environment.Exit(-4);
             }
         }
     }

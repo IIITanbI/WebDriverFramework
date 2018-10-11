@@ -53,6 +53,9 @@ namespace ReportPortal.NUnitExtension
             {
                 var xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(report);
+                Console.WriteLine(xmlDoc.OuterXml);
+                Console.WriteLine();
+                //Console.WriteLine();
                 if (xmlDoc.SelectSingleNode("/start-run") != null)
                 {
                     StartRun(xmlDoc);
