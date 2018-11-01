@@ -1,28 +1,71 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.Extensions;
-using OpenQA.Selenium.Support.PageObjects;
-using ReportPortal.Client;
-using ReportPortal.Shared;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using NLog;
+﻿using NLog;
 using NLog.Targets;
-using NUnit.Framework;
-using OpenQA.Selenium.IE;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.PageObjects;
 using PageObject.PageFactory;
 using PageObject.PageFactory.Attributes;
-using ReportPortal.NUnitExtension;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 using WebDriverFramework;
 using WebDriverFramework.Elements;
 using WebDriverFramework.Extension;
 
 namespace ConsoleApp1
 {
+    using NUnit.Framework;
+    using NUnit.Framework.Interfaces;
+    using System.Collections;
+    using System.Diagnostics;
+
+    public class Nunit2759Test
+    {
+        public enum ValuesEnum
+        {
+            Value1,
+            Value2,
+            Value3,
+        }
+
+        public class VariableValues : NUnitAttribute, IParameterDataSource
+        {
+            public int Count { get; set; }
+
+            IEnumerable IParameterDataSource.GetData(IParameterInfo parameter)
+            {
+                for (var i = 0; i < Count; i++)
+                {
+                    yield return i.ToString();
+                }
+            }
+        }
+
+        [Test]
+        public void Test2759ShouldRun([Values(1, 2, 3)] int a, [Values] ValuesEnum values)
+        {
+        }
+
+        [Test]
+        public void Test2759MustSkip([VariableValues(Count = 0)] string context, [Values] ValuesEnum values)
+        {
+        }
+    }
+    class Obj : IEquatable<Obj>
+    {
+        public int A = 3;
+
+        public bool Equals(Obj other)
+        {
+            return A.Equals(A);
+        }
+        //public override bool Equals(object obj)
+        //{
+        //    return Equals(obj as Obj);
+        //}
+    }
     [Target("RP")]
     [TestFixture]
     [Parallelizable(ParallelScope.None)]
@@ -50,59 +93,78 @@ namespace ConsoleApp1
             CustomPageFactory.InitElements(this, driver.NativeDriver, new CustomPageObjectMemberDecorator(driver));
         }
 
-        public static void AssertTrue(bool value)
-        {
-            if (!value)
-            {
-                throw new Exception("value is not true");
-            }
-        }
-
-        public static void AssertFalse(bool value)
-        {
-            if (value)
-            {
-                throw new Exception("value is not false");
-            }
-        }
         public static Logger logger = LogManager.GetCurrentClassLogger();
 
-
-        class Base
+        static void Test1123()
         {
-            public int a = 3;
-            public int b = 5;
-            public int c;
-
-            public Base()
-            {
-                c = a + b;
-            }
-        }
-        class Derived:Base
-        {
-            public int d = 6;
-         
-
-            public Derived() : base()
-            {
-                c = a + d;
-            }
-        }
-
-        class DerivedMore : Derived
-        {
-            public int x = 16;
-
-
-            public DerivedMore() : base()
-            {
-                c = x + d;
-            }
+            MethodBase m = MethodBase.GetCurrentMethod();
+            Console.WriteLine("Executing {0}.{1}",
+                              m.ReflectedType.Name, m.Name);
         }
         static void Main(string[] args)
         {
-            var x = new DerivedMore();
+            Stopwatch sw = new Stopwatch();
+
+            Thread.Sleep(2000);
+
+            var el1 = sw.Elapsed;
+
+            sw.Stop();
+            Thread.Sleep(2000);
+            var el2 = sw.IsRunning;
+
+            var l1 = new List<(string PathNames, string Name)>()
+            {
+                ("chrome", "test1"),
+                ("firefox", "test1"),
+                ("chrome", "test2"),
+                ("chrome", "test3"),
+                ("chrome", "test4"),
+                ("chrome", "test5"),
+            };
+
+            var l2 = new List<(string, string)>()
+            {
+                ("chrome", "test1"),
+                ("firefox", "test1"),
+                ("chrome", "test2"),
+            };
+
+            var itemsToDelete = from test in l2
+                                join prevTest in l1 on test.Item2 equals prevTest.Name
+                                //where test.Item1.Equals(prevTest.Item1)
+                                //where test.Item1 equals prevTest.Item1
+                                select new { test, prevTest };
+
+            //CollectionAssert.AreEqual(ints, ints2);
+
+
+            Obj o1 = new Obj();
+            Obj o2 = new Obj();
+            var rr = object.Equals(o1, o2);
+
+            Dictionary<string, bool> d1 = new Dictionary<string, bool>() {
+                {"val1", false },
+                {"val2", false },
+                {"val3", true},
+            };
+
+            IEnumerable<KeyValuePair<string, bool>> ienmuberable = d1;
+
+            Dictionary<string, bool> d2 = new Dictionary<string, bool>() {
+                {"val1", false },
+                {"val2", false },
+                {"val3", !true},
+            };
+
+            //     CollectionAssert.AreEqual(d1.ToList(), d2.ToList());
+            KeyValuePair<int, Obj> s1 = new KeyValuePair<int, Obj>(1, o1);
+            KeyValuePair<int, Obj> s2 = new KeyValuePair<int, Obj>(2, o2);
+
+            //var defaultc = EqualityComparer<KeyValuePair<int, Obj>>.Default;
+            //var pairr = s1.Equals(s2);
+            //var dictr = d1.SequenceEqual(d2);
+            Console.WriteLine();
             //Bridge.Service = new Service(new Uri("http://localhost:8080/api/v1/"), "myproject", "7a580212-5f06-4f46-8cc3-3f78cc4aa282");
             //Bridge.Service = new Service(new Uri("https://rp.epam.com/api/v1/"), "ARTSIOM_KUIS_PERSONAL", "591b2176-229c-4d3e-aca8-bbd02e9e5e55");
             ////591b2176-229c-4d3e-aca8-bbd02e9e5e55
@@ -166,18 +228,6 @@ namespace ConsoleApp1
             //Console.WriteLine("END!!!!");
             //Console.ReadLine();
             // var profile = new FirefoxProfile();
-            Dictionary<int, int> dict = new Dictionary<int, int>()
-            {
-                {1, 2},
-                {2, 3},
-                {4, 2},
-                {6, 5},
-                {8, 3},
-                {3, 5},
-                {9, 3},
-                {18, 4},
-                {19, 4},
-            };
 
             //var all = dict.Keys.Concat(dict.Values).Distinct().ToList();
             //var graph = new Graph<int>(dict, all);
@@ -188,13 +238,23 @@ namespace ConsoleApp1
             //    IgnoreZoomLevel = true
             //});
             //WebElement.DefaultElementSearchTimeout = 60;
-
             var opt = new ChromeOptions();
-            opt.AddExcludedArgument("enable-automation");
-            var driver = new WebDriver(new ChromeDriver(opt));
 
-            driver.NativeDriver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test1.html");
-            //driver.Driver.Navigate().GoToUrl("https://onliner.by");
+            var drv = new ChromeDriver();
+            drv.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1);
+            // var to = drv.Manage().Timeouts().ImplicitWait;
+            var driver = new WebDriver(drv);
+            // driver.NativeDriver.Navigate().GoToUrl("file:///C:/Users/Artsiom_Kuis/Desktop/test1.html");
+            driver.NativeDriver.Navigate().GoToUrl("https://onliner.by");
+
+            //drv.NetworkConditions = new ChromeNetworkConditions()
+            //{
+            //    IsOffline = true,
+            //    Latency = TimeSpan.FromMilliseconds(100),
+            //    DownloadThroughput = 1000,
+            //    UploadThroughput = 1000
+            //};
+            driver.NativeDriver.Navigate().GoToUrl("https://tut.by");
             //var rssesult = driver.Driver.ExecuteJavaScript<string>("return window.localStorage");
             //var rssessult = driver.Driver.ExecuteJavaScript<string>("window.localStorage.setItem('key', 'value')");
             //driver.WaitForPresent(TimeSpan.FromSeconds(10), By.XPath(".//test"));
@@ -247,6 +307,71 @@ namespace ConsoleApp1
 
         }
 
+        //[Test]
+        //public void TakingHTML2CanvasFullPageScreenshot()
+        //{
+        //    using (var driver = new ChromeDriver())
+        //    {
+        //        Environment.CurrentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        //        // driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(5);
+        //        driver.Navigate().GoToUrl(@"https://www.automatetheplanet.com/full-page-screenshots-webdriver-html2canvas");
+        //        IJavaScriptExecutor js = driver;
+        //        var html2canvasJs = File.ReadAllText("html2canvas.min.txt");
+        //        js.ExecuteScript(html2canvasJs);
+        //        string generateScreenshotJS = @"function genScreenshot () {
+        //                                 var canvasImgContentDecoded;
+
+        //                                    html2canvas(document.body).then(canvas => {
+        //                                        document.body.appendChild(canvas);
+        //                                        window.canvasImgContentDecoded = canvas.toDataURL(""image/png"");   
+        //                                     });
+        //                                   }
+        //                                genScreenshot();";
+        //        js.ExecuteScript(generateScreenshotJS);
+        //        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(1000));
+        //        wait.IgnoreExceptionTypes(typeof(InvalidOperationException));
+        //        var pngContent = wait.Until(
+        //            wd =>
+        //            {
+        //                var bitmap = js.ExecuteScript(@"
+        //                            if (typeof canvasImgContentDecoded === 'undefined') return null;
+        //                            return canvasImgContentDecoded;");
+        //                return bitmap;
+        //            }).ToString();
+
+        //        pngContent = pngContent.Replace("data:image/png;base64,", string.Empty);
+        //        byte[] data = Convert.FromBase64String(pngContent);
+        //        Image image;
+        //        using (var ms = new MemoryStream(data))
+        //        {
+        //            image = Image.FromStream(ms);
+        //        }
+        //        image.Save("new.png", ImageFormat.Png);
+        //    }
+        //}
+
+        //[Test]
+        //public void TakingScreenShot_Old()
+        //{
+        //    var options = new FirefoxOptions
+        //    {
+        //        BrowserExecutableLocation = @"C:\Program Files\Mozilla Firefox\firefox.exe"
+        //    };
+
+        //    var opt1 = new InternetExplorerOptions()
+        //    {
+        //        IgnoreZoomLevel = true
+        //    };
+        //    using (var driver = new InternetExplorerDriver(opt1))
+        //    {
+        //        Environment.CurrentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        //        // driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(5);
+        //        driver.Navigate().GoToUrl(@"https://www.automatetheplanet.com/full-page-screenshots-webdriver-html2canvas");
+
+        //        var bitmap = new WebDriver(driver).MakeScreenshot(null);
+        //        bitmap.Save("old.png", ImageFormat.Png);
+        //    }
+        //}
 
         [SetUp]
         public void Setup()
@@ -268,70 +393,28 @@ namespace ConsoleApp1
         private object res = null;
 
         private int e = (int)10;
-        // [TestCase]
+        [TestCase]
         public void TestCase1()
         {
             for (int i = 0; i < e; i++)
             {
                 Thread.Sleep(200);
-                logger.Info("1" + res);
+                logger.Info("1 " + res);
             }
         }
 
-        // [TestCase]
+        [TestCase]
         public void TestCase2()
         {
             for (int i = 0; i < e; i++)
             {
                 Thread.Sleep(1000);
-                logger.Info("2");
+                logger.Info("2 " + res);
             }
         }
     }
 
-    class TestProgramm : Program
-    {
-        [SetUp]
-        public void Setup1()
-        {
-            Thread.Sleep(1000);
-            logger.Info("Setup Method 1");
-        }
 
-        [SetUp]
-        public void Setup2()
-        {
-            Thread.Sleep(1000);
-            logger.Info("Setup Method 2");
-        }
-        [TearDown]
-        public void Down1()
-        {
-            Thread.Sleep(1000);
-            logger.Info("Down 1");
-        }
-
-        [TestCase]
-        public void TestCase3()
-        {
-            logger.Warn("case");
-            Thread.Sleep(1000);
-            for (int i = 0; i < 10; i++)
-            {
-                //Thread.Sleep(100);
-            }
-        }
-
-        [TestCase]
-        public void TestCase4()
-        {
-            Thread.Sleep(200);
-            for (int i = 0; i < 10; i++)
-            {
-                // Thread.Sleep(100);
-            }
-        }
-    }
     public class Graph<T>
     {
         //dictonary - member and his parent 

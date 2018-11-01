@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Xml.Linq;
 
 namespace ReportPortal.Client.Converters
 {
@@ -18,8 +17,10 @@ namespace ReportPortal.Client.Converters
                 UseSimpleDictionaryFormat = true
             };
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T), settings);
-       
-            MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            MemoryStream stream = new MemoryStream();
+            var bytes = Encoding.UTF8.GetBytes(json);
+            stream.Write(bytes, 0, bytes.Length);
+            stream.Position = 0;
             return (T)serializer.ReadObject(stream);
         }
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.8.0.0" clr-version="4.0.30319.42000" start-time="2018-02-26 15:25:40Z" end-time="2018-02-26 15:25:43Z" duration="2.487930">
+<test-run id="2" testcasecount="8" result="Passed" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.8.0.0" clr-version="4.0.30319.42000" start-time="2018-10-01 08:01:11Z" end-time="2018-10-01 08:01:32Z" duration="21.016804">
   <command-line><![CDATA["C:\WebDriverFramework\NUnit.ConsoleRunner.3.8.0\tools\nunit3-console.exe" C:\WebDriverFramework\Solution\ConsoleApp1\bin\Debug\ConsoleApp1.exe]]></command-line>
-  <test-suite type="Assembly" id="0-1005" name="ConsoleApp1.exe" fullname="C:\WebDriverFramework\Solution\ConsoleApp1\bin\Debug\ConsoleApp1.exe" runstate="Runnable" testcasecount="2" result="Passed" start-time="2018-02-26 15:25:41Z" end-time="2018-02-26 15:25:42Z" duration="1.601351" total="2" passed="2" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
-    <environment framework-version="3.9.0.0" clr-version="4.0.30319.42000" os-version="Microsoft Windows NT 10.0.15063.0" platform="Win32NT" cwd="C:\WebDriverFramework\NUnit.ConsoleRunner.3.8.0\tools" machine-name="EPBYGROW0131" user="Artsiom_Kuis" user-domain="GRODNO" culture="en-US" uiculture="en-US" os-architecture="x86" />
+  <test-suite type="Assembly" id="0-1015" name="ConsoleApp1.exe" fullname="C:\WebDriverFramework\Solution\ConsoleApp1\bin\Debug\ConsoleApp1.exe" runstate="Runnable" testcasecount="8" result="Passed" start-time="2018-10-01 08:01:12Z" end-time="2018-10-01 08:01:32Z" duration="20.305478" total="8" passed="8" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
+    <environment framework-version="3.10.1.0" clr-version="4.0.30319.42000" os-version="Microsoft Windows NT 10.0.15063.0" platform="Win32NT" cwd="C:\WebDriverFramework\NUnit.ConsoleRunner.3.8.0\tools" machine-name="EPBYGROW0131" user="Artsiom_Kuis" user-domain="GRODNO" culture="en-US" uiculture="en-US" os-architecture="x86" />
     <settings>
       <setting name="DisposeRunners" value="True" />
       <setting name="WorkDirectory" value="C:\WebDriverFramework\NUnit.ConsoleRunner.3.8.0\tools" />
@@ -14,16 +14,45 @@
       <setting name="NumberOfTestWorkers" value="8" />
     </settings>
     <properties>
-      <property name="_PID" value="22616" />
+      <property name="_PID" value="25752" />
       <property name="_APPDOMAIN" value="domain-" />
     </properties>
-    <test-suite type="TestSuite" id="0-1006" name="ConsoleApp1" fullname="ConsoleApp1" runstate="Runnable" testcasecount="2" result="Passed" start-time="2018-02-26 15:25:41Z" end-time="2018-02-26 15:25:42Z" duration="1.584725" total="2" passed="2" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
-      <test-suite type="TestFixture" id="0-1000" name="Program" fullname="ConsoleApp1.Program" classname="ConsoleApp1.Program" runstate="Runnable" testcasecount="2" result="Passed" start-time="2018-02-26 15:25:41Z" end-time="2018-02-26 15:25:42Z" duration="1.580865" total="2" passed="2" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
-        <test-suite type="ParameterizedMethod" id="0-1004" name="TestCase" fullname="ConsoleApp1.Program.TestCase" classname="ConsoleApp1.Program" runstate="Runnable" testcasecount="1" result="Passed" start-time="2018-02-26 15:25:41Z" end-time="2018-02-26 15:25:42Z" duration="1.218221" total="1" passed="1" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
-          <test-case id="0-1003" name="TestCase()" fullname="ConsoleApp1.Program.TestCase()" methodname="TestCase" classname="ConsoleApp1.Program" runstate="Runnable" seed="728214795" result="Passed" start-time="2018-02-26 15:25:41Z" end-time="2018-02-26 15:25:42Z" duration="1.213875" asserts="0" />
+    <test-suite type="TestSuite" id="0-1016" name="ConsoleApp1" fullname="ConsoleApp1" runstate="Runnable" testcasecount="8" result="Passed" start-time="2018-10-01 08:01:12Z" end-time="2018-10-01 08:01:32Z" duration="20.285955" total="8" passed="8" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
+      <test-suite type="TestFixture" id="0-1000" name="Program" fullname="ConsoleApp1.Program" classname="ConsoleApp1.Program" runstate="Runnable" testcasecount="2" result="Passed" start-time="2018-10-01 08:01:12Z" end-time="2018-10-01 08:01:25Z" duration="13.274895" total="2" passed="2" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
+        <properties>
+          <property name="ParallelScope" value="None" />
+        </properties>
+        <test-suite type="ParameterizedMethod" id="0-1002" name="TestCase1" fullname="ConsoleApp1.Program.TestCase1" classname="ConsoleApp1.Program" runstate="Runnable" testcasecount="1" result="Passed" start-time="2018-10-01 08:01:12Z" end-time="2018-10-01 08:01:15Z" duration="2.870952" total="1" passed="1" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
+          <test-case id="0-1001" name="TestCase1()" fullname="ConsoleApp1.Program.TestCase1()" methodname="TestCase1" classname="ConsoleApp1.Program" runstate="Runnable" seed="479077409" result="Passed" start-time="2018-10-01 08:01:12Z" end-time="2018-10-01 08:01:15Z" duration="2.866094" asserts="0" />
         </test-suite>
-        <test-suite type="ParameterizedMethod" id="0-1002" name="TestCase1" fullname="ConsoleApp1.Program.TestCase1" classname="ConsoleApp1.Program" runstate="Runnable" testcasecount="1" result="Passed" start-time="2018-02-26 15:25:42Z" end-time="2018-02-26 15:25:42Z" duration="0.000229" total="1" passed="1" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
-          <test-case id="0-1001" name="TestCase1()" fullname="ConsoleApp1.Program.TestCase1()" methodname="TestCase1" classname="ConsoleApp1.Program" runstate="Runnable" seed="1888943470" result="Passed" start-time="2018-02-26 15:25:42Z" end-time="2018-02-26 15:25:42Z" duration="0.000178" asserts="0" />
+        <test-suite type="ParameterizedMethod" id="0-1004" name="TestCase2" fullname="ConsoleApp1.Program.TestCase2" classname="ConsoleApp1.Program" runstate="Runnable" testcasecount="1" result="Passed" start-time="2018-10-01 08:01:15Z" end-time="2018-10-01 08:01:25Z" duration="10.007799" total="1" passed="1" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
+          <test-case id="0-1003" name="TestCase2()" fullname="ConsoleApp1.Program.TestCase2()" methodname="TestCase2" classname="ConsoleApp1.Program" runstate="Runnable" seed="1940565352" result="Passed" start-time="2018-10-01 08:01:15Z" end-time="2018-10-01 08:01:25Z" duration="10.007690" asserts="0" />
+        </test-suite>
+      </test-suite>
+      <test-suite type="SetUpFixture" id="0-1011" name="Test2" fullname="ConsoleApp1.Test2.TestsSetup2" classname="ConsoleApp1.Test2.TestsSetup2" runstate="Runnable" testcasecount="2" result="Passed" start-time="2018-10-01 08:01:25Z" end-time="2018-10-01 08:01:32Z" duration="7.003604" total="2" passed="2" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
+        <properties>
+          <property name="ParallelScope" value="All" />
+        </properties>
+        <test-suite type="TestFixture" id="0-1012" name="Tests2" fullname="ConsoleApp1.Test2.Tests2" classname="ConsoleApp1.Test2.Tests2" runstate="Runnable" testcasecount="2" result="Passed" start-time="2018-10-01 08:01:27Z" end-time="2018-10-01 08:01:32Z" duration="5.001314" total="2" passed="2" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
+          <properties>
+            <property name="ParallelScope" value="All" />
+          </properties>
+          <test-case id="0-1014" name="Test2" fullname="ConsoleApp1.Test2.Tests2.Test2" methodname="Test2" classname="ConsoleApp1.Test2.Tests2" runstate="Runnable" seed="569801689" result="Passed" start-time="2018-10-01 08:01:27Z" end-time="2018-10-01 08:01:32Z" duration="5.000714" asserts="0" />
+          <test-case id="0-1013" name="Test1" fullname="ConsoleApp1.Test2.Tests2.Test1" methodname="Test1" classname="ConsoleApp1.Test2.Tests2" runstate="Runnable" seed="348098104" result="Passed" start-time="2018-10-01 08:01:27Z" end-time="2018-10-01 08:01:32Z" duration="5.000783" asserts="0" />
+        </test-suite>
+      </test-suite>
+      <test-suite type="SetUpFixture" id="0-1005" name="Test1" fullname="ConsoleApp1.Test1.TestsSetup1" classname="ConsoleApp1.Test1.TestsSetup1" runstate="Runnable" testcasecount="4" result="Passed" start-time="2018-10-01 08:01:25Z" end-time="2018-10-01 08:01:32Z" duration="7.003674" total="4" passed="4" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
+        <properties>
+          <property name="ParallelScope" value="All" />
+        </properties>
+        <test-suite type="TestFixture" id="0-1006" name="Tests1" fullname="ConsoleApp1.Test1.Tests1" classname="ConsoleApp1.Test1.Tests1" runstate="Runnable" testcasecount="4" result="Passed" start-time="2018-10-01 08:01:27Z" end-time="2018-10-01 08:01:32Z" duration="5.001591" total="4" passed="4" failed="0" warnings="0" inconclusive="0" skipped="0" asserts="0">
+          <properties>
+            <property name="ParallelScope" value="All" />
+          </properties>
+          <test-case id="0-1007" name="Test1" fullname="ConsoleApp1.Test1.Tests1.Test1" methodname="Test1" classname="ConsoleApp1.Test1.Tests1" runstate="Runnable" seed="947366729" result="Passed" start-time="2018-10-01 08:01:27Z" end-time="2018-10-01 08:01:32Z" duration="5.001089" asserts="0" />
+          <test-case id="0-1008" name="Test2" fullname="ConsoleApp1.Test1.Tests1.Test2" methodname="Test2" classname="ConsoleApp1.Test1.Tests1" runstate="Runnable" seed="732737250" result="Passed" start-time="2018-10-01 08:01:27Z" end-time="2018-10-01 08:01:32Z" duration="5.001257" asserts="0" />
+          <test-case id="0-1009" name="Test3" fullname="ConsoleApp1.Test1.Tests1.Test3" methodname="Test3" classname="ConsoleApp1.Test1.Tests1" runstate="Runnable" seed="658948686" result="Passed" start-time="2018-10-01 08:01:27Z" end-time="2018-10-01 08:01:32Z" duration="5.001139" asserts="0" />
+          <test-case id="0-1010" name="Test4" fullname="ConsoleApp1.Test1.Tests1.Test4" methodname="Test4" classname="ConsoleApp1.Test1.Tests1" runstate="Runnable" seed="586396" result="Passed" start-time="2018-10-01 08:01:27Z" end-time="2018-10-01 08:01:32Z" duration="5.000989" asserts="0" />
         </test-suite>
       </test-suite>
     </test-suite>

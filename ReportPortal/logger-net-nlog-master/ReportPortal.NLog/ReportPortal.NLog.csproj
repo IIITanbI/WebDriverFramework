@@ -1,26 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45</TargetFrameworks>
+    <TargetFrameworks>net45;</TargetFrameworks>
 
-    <Authors>reportportal</Authors>
-    <Company>Report Portal</Company>
+    <Version>1.0.0</Version>
+    <Description>Appender for NLog to report log messages into ReportPortal</Description>
+    <Authors>Nikolay Borisenko, Report Portal Community</Authors>
+    
     <PackageLicenseUrl>https://raw.githubusercontent.com/reportportal/logger-net-nlog/master/LICENSE</PackageLicenseUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/reportportal/logger-net-nlog/master/Logo.png</PackageIconUrl>
     <PackageProjectUrl>http://reportportal.io</PackageProjectUrl>
-    <PackageIconUrl>https://reportportal.github.io/img/rp_logo.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/reportportal/logger-net-nlog</RepositoryUrl>
+    
     <RepositoryType>GitHub</RepositoryType>
     <PackageTags>reportportal testing nlog</PackageTags>
-    <Version>1.1.9-beta1</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.4.13" />
+    <PackageReference Include="NLog" Version="4.5.10" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\client-net-master\client-net-master\ReportPortal.Client\ReportPortal.Client.csproj" />
     <ProjectReference Include="..\..\commons-net-master\ReportPortal.Shared\ReportPortal.Shared.csproj" />
   </ItemGroup>
 

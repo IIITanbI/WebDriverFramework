@@ -3,7 +3,6 @@ using NUnit.Engine.Extensibility;
 using ReportPortal.Client;
 using ReportPortal.Client.Models;
 using ReportPortal.NUnitExtension.Configuration;
-using ReportPortal.NUnitExtension.EventArguments;
 using ReportPortal.Shared;
 using System;
 using System.Collections.Generic;
@@ -18,7 +17,7 @@ namespace ReportPortal.NUnitExtension
     {
         static ReportPortalListener()
         {
-            var configPath = Path.GetDirectoryName(new Uri(typeof(Config).Assembly.CodeBase).LocalPath) + "/ReportPortal.conf";
+            var configPath = Path.GetDirectoryName(new Uri(typeof(Config).Assembly.CodeBase).LocalPath) + "/ReportPortal.config.json";
             Config = Client.Converters.ModelSerializer.Deserialize<Config>(File.ReadAllText(configPath));
 
             Service rpService;
@@ -37,13 +36,12 @@ namespace ReportPortal.NUnitExtension
             _statusMap["Failed"] = Status.Failed;
             _statusMap["Skipped"] = Status.Skipped;
             _statusMap["Inconclusive"] = Status.Skipped;
+            _statusMap["Warning"] = Status.Failed;
         }
 
         private static Dictionary<string, Status> _statusMap = new Dictionary<string, Status>();
 
-        private Dictionary<string, TestReporter> _suitesFlow = new Dictionary<string, TestReporter>();
-        private Dictionary<string, TestReporter> _testFlowIds = new Dictionary<string, TestReporter>();
-        private Dictionary<string, TestReporter> _testFlowNames = new Dictionary<string, TestReporter>();
+        private Dictionary<string, FlowItemInfo> _flowItems = new Dictionary<string, FlowItemInfo>();
 
         public static Config Config { get; private set; }
 
@@ -53,9 +51,6 @@ namespace ReportPortal.NUnitExtension
             {
                 var xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(report);
-                Console.WriteLine(xmlDoc.OuterXml);
-                Console.WriteLine();
-                //Console.WriteLine();
                 if (xmlDoc.SelectSingleNode("/start-run") != null)
                 {
                     StartRun(xmlDoc);
@@ -84,6 +79,36 @@ namespace ReportPortal.NUnitExtension
                 {
                     TestOutput(xmlDoc);
                 }
+
+                else if (xmlDoc.SelectSingleNode("/test-message") != null)
+                {
+                    TestMessage(xmlDoc);
+                }
+            }
+        }
+
+        internal class FlowItemInfo
+        {
+            public FlowItemInfo(FlowType flowType, string fullName, TestReporter reporter, DateTime startTime)
+            {
+                FlowItemType = flowType;
+                FullName = fullName;
+                Reporter = reporter;
+                StartTime = startTime;
+            }
+
+            public FlowType FlowItemType { get; private set; }
+
+            public string FullName { get; private set; }
+
+            public TestReporter Reporter { get; private set; }
+
+            public DateTime StartTime { get; private set; }
+
+            internal enum FlowType
+            {
+                Suite,
+                Test
             }
         }
     }

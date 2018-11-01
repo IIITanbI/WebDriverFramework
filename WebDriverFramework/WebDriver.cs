@@ -6,6 +6,9 @@
     using OpenQA.Selenium.Support.UI;
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
+    using System.Threading;
 
     public class WebDriver : IGetElement, IGetElements
     {
@@ -60,6 +63,69 @@
         public void Quit()
         {
             this.NativeDriver.Quit();
+        }
+
+        private Bitmap AddCropImage(Bitmap source, Image addedBitmap, Rectangle section)
+        {
+            int height = source?.Height ?? 0;
+            int width = source?.Width ?? 0;
+            if (width != 0 && width != section.Width)
+                throw new Exception("Section width not equal to addToBitmap width");
+
+            Bitmap bmp = new Bitmap(section.Width, section.Height + height);
+            Graphics g = Graphics.FromImage(bmp);
+            if (height > 0 && width > 0)
+                g.DrawImage(source, 0, 0, new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
+
+            g.DrawImage(addedBitmap, 0, height, section, GraphicsUnit.Pixel);
+
+            return bmp;
+        }
+        public Bitmap MakeScreenshot(ILogger log, bool fullScreen = true)
+        {
+            Func<Bitmap> getScreenshot = () =>
+            {
+                Screenshot screenshot = ((ITakesScreenshot)this.NativeDriver).GetScreenshot();
+                Bitmap bmp = null;
+                using (var ms = new MemoryStream(screenshot.AsByteArray))
+                    bmp = new Bitmap(ms);
+                return bmp;
+            };
+
+            if (!fullScreen)
+            {
+                return getScreenshot();
+            }
+
+            Bitmap result = null;
+
+            long clientHeight = ExecuteJavaScript<long>("return window.innerHeight", new object[0]);
+            long clientWidth = ExecuteJavaScript<long>("return document.body.clientWidth", new object[0]);
+            long scrollHeight = ExecuteJavaScript<long>("return document.body.scrollHeight", new object[0]);
+
+            for (long cur = 0; cur < scrollHeight; cur += clientHeight)
+            {
+                Rectangle section;
+                if (cur > scrollHeight - clientHeight)
+                {
+                    long height = cur - (scrollHeight - clientHeight);
+                    section = new Rectangle(0, (int)height, (int)clientWidth, (int)(clientHeight - height));
+                }
+                else
+                {
+                    section = new Rectangle(0, 0, (int)clientWidth, (int)clientHeight);
+                }
+
+                ExecuteJavaScript($"document.documentElement.scrollTop={cur}", new object[0]);
+                Thread.Sleep(1000);
+
+                using (Bitmap bmp = getScreenshot())
+                {
+                    result = AddCropImage(result, bmp, section);
+                }
+            }
+
+            return result;
         }
     }
 }
